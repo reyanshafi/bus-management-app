@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Student Portal | University Transport</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap');
+    
+    body {
+      font-family: 'Montserrat', Arial, sans-serif;
+      background-color: #ffffff;
+      color: #1f2937;
+    }
+
+    .sidebar {
+      background: #1f2937;
+      transition: all 0.3s ease;
+      border-right: 1px solid #e5e7eb;
+    }
+
+    .nav-link {
+      transition: all 0.2s ease;
+      border-radius: 8px;
+      color: #9ca3af;
+      font-weight: 500;
+    }
+
+    .nav-link:hover {
+      background-color: #374151;
+      color: #f9fafb;
+    }
+
+    .nav-link.active {
+      background-color: #4f46e5;
+      color: #ffffff;
+      font-weight: 600;
+    }
+
+    .card {
+      background: #ffffff;
+      border-radius: 12px;
+      border: 1px solid #e5e7eb;
+      box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+      transition: box-shadow 0.2s ease;
+    }
+
+    .card:hover {
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-primary {
+      background-color: #4f46e5;
+      color: #ffffff;
+      border-radius: 8px;
+      font-weight: 600;
+      transition: background-color 0.2s ease;
+    }
+
+    .btn-primary:hover {
+      background-color: #4338ca;
+    }
+
+    .form-input {
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      transition: border-color 0.2s ease;
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: #4f46e5;
+      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+    }
+
+    .section-content { display: none; }
+    .section-content.active { display: block; }
+
+    .icon-container {
+      border-radius: 12px;
+      padding: 12px;
+    }
+
+    @media (max-width: 768px) {
+      .sidebar { 
+        transform: translateX(-100%); 
+        position: fixed; 
+        z-index: 50; 
+        height: 100vh; 
+      }
+      .sidebar.active { 
+        transform: translateX(0); 
+      }
+    }
+
+    .sidebar.closed { 
+      display: none !important; 
+    }
+    
+    body.sidebar-closed .md\:ml-64 { 
+      margin-left: 0 !important; 
+    }
+
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #f3f4f6; }
+    ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
+  </style>
+</head>
+<body class="bg-white min-h-screen">
+  <!-- Mobile Menu Button -->
+  <button id="mobileMenuButton" class="md:hidden fixed top-4 left-4 z-50 bg-white p-3 rounded-lg shadow-md border">
+    <i class="fas fa-bars text-gray-700"></i>
+  </button>
+
+  <!-- Sidebar Navigation -->
+  <div class="sidebar w-64 fixed h-full overflow-y-auto">
+    <div class="p-6 border-b border-gray-600">
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 bg-indigo-600 rounded-lg flex items-center justify-center">
+          <i class="fas fa-graduation-cap text-white"></i>
+        </div>
+        <div>
+          <h1 class="text-xl font-bold text-white">Student Portal</h1>
+          <p class="text-sm text-gray-400">Transport System</p>
+        </div>
+      </div>
+    </div>
+    
+    <nav class="p-4 space-y-1">
+      <a href="#dashboard" class="nav-link active flex items-center space-x-3 py-3 px-3 rounded-lg">
+        <i class="fas fa-tachometer-alt w-5"></i>
+        <span>Dashboard</span>
+      </a>
+      <a href="#transport" class="nav-link flex items-center space-x-3 py-3 px-3 rounded-lg">
+        <i class="fas fa-bus w-5"></i>
+        <span>Transport</span>
+      </a>
+      <a href="#profile" class="nav-link flex items-center space-x-3 py-3 px-3 rounded-lg">
+        <i class="fas fa-user w-5"></i>
+        <span>Profile</span>
+      </a>
+      <a href="#feedback" class="nav-link flex items-center space-x-3 py-3 px-3 rounded-lg">
+        <i class="fas fa-comment-alt w-5"></i>
+        <span>Feedback</span>
+      </a>
+      <a href="#notifications" class="nav-link flex items-center space-x-3 py-3 px-3 rounded-lg">
+        <i class="fas fa-bell w-5"></i>
+        <span>Notifications</span>
+      </a>
+      
+      <div class="pt-4 mt-4 border-t border-gray-600">
+        <a href="#" id="logoutBtn" class="nav-link flex items-center space-x-3 py-3 px-3 rounded-lg text-red-400 hover:text-red-300">
+          <i class="fas fa-sign-out-alt w-5"></i>
+          <span>Logout</span>
+        </a>
+      </div>
+    </nav>
+    
+    <div class="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-600">
+      <p class="text-xs text-gray-400">Student Portal v2.0</p>
+      <p class="text-xs text-gray-500">© 2023 University Transport</p>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="md:ml-64 min-h-screen bg-gray-50">
+    <!-- Header -->
+    <header class="bg-white border-b p-6 sticky top-0 z-30">
+      <div class="flex justify-between items-center">
+        <div class="flex items-center gap-3">
+          <button id="sidebarToggleBtn" class="md:inline-block p-2 rounded-lg hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-200 mr-2">
+            <i id="sidebarToggleIcon" class="fas fa-bars text-gray-700 text-xl"></i>
+          </button>
+          <div>
+            <h1 class="text-3xl font-bold text-gray-900" id="sectionTitle">Dashboard</h1>
+            <p class="text-gray-600 mt-1">Welcome back to your transport portal</p>
+          </div>
+        </div>
+        <div class="flex items-center space-x-4">
+          <button class="p-2 rounded-lg hover:bg-gray-100 relative">
+            <i class="fas fa-bell text-gray-600"></i>
+            <span class="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></span>
+          </button>
+          <div class="w-10 h-10 bg-indigo-600 rounded-lg flex items-center justify-center">
+            <i class="fas fa-user text-white"></i>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div class="p-6 space-y-6">
+      <!-- Dashboard Section -->
+      <div id="dashboardSection" class="section-content active">
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+          <div class="card p-6">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-sm font-medium text-gray-500 mb-1">Assigned Bus</p>
+                <p id="assignedBusCard" class="text-2xl font-bold text-gray-900">Loading...</p>
+              </div>
+              <div class="icon-container bg-indigo-100">
+                <i class="fas fa-bus text-indigo-600 text-xl"></i>
+              </div>
+            </div>
+          </div>
+
+          <div class="card p-6">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-sm font-medium text-gray-500 mb-1">Next Stop</p>
+                <p id="nextStopCard" class="text-2xl font-bold text-gray-900">Loading...</p>
+              </div>
+              <div class="icon-container bg-emerald-100">
+                <i class="fas fa-map-marker-alt text-emerald-600 text-xl"></i>
+              </div>
+            </div>
+          </div>
+
+          <div class="card p-6">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-sm font-medium text-gray-500 mb-1">Estimated Arrival</p>
+                <p id="etaCard" class="text-2xl font-bold text-gray-900">Loading...</p>
+              </div>
+              <div class="icon-container bg-violet-100">
+                <i class="fas fa-clock text-violet-600 text-xl"></i>
+              </div>
+            </div>
+          </div>
+
+          <div class="card p-6">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-sm font-medium text-gray-500 mb-1">Bus Status</p>
+                <p id="busStatusCard" class="text-2xl font-bold text-gray-900">Loading...</p>
+              </div>
+              <div class="icon-container bg-amber-100">
+                <i class="fas fa-info-circle text-amber-600 text-xl"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- New Real-Time Sections -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6 mb-6">
+          <!-- Live Bus Occupancy -->
+          <div class="card p-6">
+            <h3 class="text-lg font-semibold mb-3 flex items-center gap-2">
+              <i class="fas fa-users text-green-500"></i> Live Bus Occupancy
+            </h3>
+            <div id="busOccupancyInfo" class="text-2xl font-bold text-gray-900 mb-1">-- / --</div>
+            <div class="text-gray-500 text-sm">Available / Total Seats</div>
+          </div>
+          <!-- Recent Feedback Activity -->
+          <div class="card p-6">
+            <h3 class="text-lg font-semibold mb-3 flex items-center gap-2">
+              <i class="fas fa-comment-dots text-purple-500"></i> Recent Feedback Activity
+            </h3>
+            <ul id="recentFeedbackList" class="space-y-2">
+              <li class="text-gray-500">Loading recent feedback...</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Recent Announcements -->
+        <div class="card p-6">
+          <h2 class="text-xl font-semibold mb-4">Recent Announcements</h2>
+          <div id="dashboardNotifications" class="space-y-3">
+            <div class="p-3 text-center text-gray-400">
+              <i class="fas fa-spinner fa-spin"></i> Loading announcements...
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Transport Section -->
+      <div id="transportSection" class="section-content">
+        <div class="card p-6">
+          <h2 class="text-xl font-semibold mb-6">Your Assigned Bus & Route</h2>
+          <div id="transportMsg" class="text-center text-gray-500 mb-4"></div>
+          <div id="transportBusDetails" class="mb-8"></div>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div>
+              <h3 class="text-lg font-semibold mb-3 flex items-center gap-2">
+                <i class="fas fa-route text-blue-500"></i> Route Stops
+              </h3>
+              <ol id="transportRouteList" class="list-decimal list-inside space-y-2 bg-blue-50 rounded-lg p-4 border border-blue-100"></ol>
+            </div>
+            <div>
+              <h3 class="text-lg font-semibold mb-3 flex items-center gap-2">
+                <i class="fas fa-clock text-purple-500"></i> Schedule
+              </h3>
+              <ul id="transportScheduleList" class="space-y-2 bg-purple-50 rounded-lg p-4 border border-purple-100"></ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Profile Section -->
+      <div id="profileSection" class="section-content">
+        <div class="card p-6 max-w-2xl mx-auto">
+          <h2 class="text-xl font-semibold mb-6">Your Profile</h2>
+          <div id="profileMsg" class="text-center text-gray-500 mb-4"></div>
+          
+          <div id="profileDetails" class="space-y-4">
+            <div class="flex items-center gap-4">
+              <img id="profilePicPreview" src="https://placehold.co/80x80?text=Photo" alt="Profile Picture" class="w-20 h-20 rounded-full object-cover border-2 border-gray-200">
+              <div>
+                <input type="file" id="profilePicInput" accept="image/*" class="block text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" />
+              </div>
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+              <input type="text" id="profileNameInput" class="form-input w-full px-4 py-2" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+              <input type="text" id="profileEmailInput" class="form-input w-full px-4 py-2 bg-gray-100 text-gray-500" disabled />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+              <input type="text" id="profilePhoneInput" class="form-input w-full px-4 py-2" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Assigned Bus</label>
+              <input type="text" id="profileBusInput" class="form-input w-full px-4 py-2 bg-gray-100 text-gray-500" disabled />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Registration Date</label>
+              <input type="text" id="profileRegDateInput" class="form-input w-full px-4 py-2 bg-gray-100 text-gray-500" disabled />
+            </div>
+            <button id="profileSaveBtn" class="btn-primary w-full py-2">Save Changes</button>
+            
+            <hr class="my-6">
+            <form id="profilePasswordForm" class="space-y-4">
+              <h3 class="text-lg font-semibold">Change Password</h3>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Old Password</label>
+                <input type="password" id="profileOldPassword" class="form-input w-full px-4 py-2" required />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">New Password</label>
+                <input type="password" id="profileNewPassword" class="form-input w-full px-4 py-2" required />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Confirm New Password</label>
+                <input type="password" id="profileConfirmPassword" class="form-input w-full px-4 py-2" required />
+              </div>
+              <div id="profilePasswordMsg" class="text-center text-sm"></div>
+              <button type="submit" class="w-full bg-purple-600 text-white py-2 rounded-lg hover:bg-purple-700 transition font-semibold">Change Password</button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- Feedback Section -->
+      <div id="feedbackSection" class="section-content">
+        <div class="card p-6 max-w-2xl mx-auto">
+          <h2 class="text-xl font-semibold mb-6">Feedback</h2>
+          <form id="feedbackForm" class="space-y-4 mb-8">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Subject (optional)</label>
+              <input type="text" id="feedbackTitle" class="form-input w-full px-4 py-2" placeholder="Subject or Title" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Message</label>
+              <textarea id="feedbackMsg" rows="4" class="form-input w-full px-4 py-2" placeholder="Type your feedback or issue here..." required></textarea>
+            </div>
+            <div id="feedbackFormMsg" class="text-center text-sm"></div>
+            <button id="feedbackSubmitBtn" type="submit" class="btn-primary w-full py-2">Submit Feedback</button>
+          </form>
+          <h3 class="text-lg font-semibold mb-4">Your Previous Feedback</h3>
+          <div id="feedbackList" class="space-y-4">
+            <!-- Feedback cards will be injected here -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Notifications Section -->
+      <div id="notificationsSection" class="section-content">
+        <div class="card p-6 max-w-2xl mx-auto">
+          <h2 class="text-xl font-semibold mb-6">Notifications</h2>
+          <div id="notificationsList" class="space-y-4">
+            <!-- Notification cards will be injected here -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="js/student.js"></script>
+  <script>
+    // Sidebar toggle logic
+    const sidebar = document.querySelector('.sidebar');
+    const mainContent = document.querySelector('.md\\:ml-64');
+    const toggleBtn = document.getElementById('sidebarToggleBtn');
+    const toggleIcon = document.getElementById('sidebarToggleIcon');
+    let sidebarOpen = true;
+    toggleBtn.addEventListener('click', function() {
+      sidebarOpen = !sidebarOpen;
+      sidebar.classList.toggle('closed');
+      if (sidebarOpen) {
+        toggleIcon.classList.remove('fa-xmark', 'fa-times');
+        toggleIcon.classList.add('fa-bars');
+        mainContent.classList.add('md:ml-64');
+      } else {
+        toggleIcon.classList.remove('fa-bars');
+        toggleIcon.classList.add('fa-xmark');
+        mainContent.classList.remove('md:ml-64');
+      }
+    });
+  </script>
+</body>
+</html>

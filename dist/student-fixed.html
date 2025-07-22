@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    .nav-link.active {
+      background: rgba(255, 255, 255, 0.1);
+      border-left: 4px solid #3b82f6;
+    }
+    .nav-link.active:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+    .section-content {
+      display: none;
+    }
+    .section-content.active {
+      display: block;
+    }
+    #map {
+      min-height: 400px;
+      height: 400px;
+    }
+  </style>
+</head>
+<body class="bg-gray-100">
+  <div class="flex h-screen">
+    <!-- Sidebar -->
+    <div class="w-64 bg-blue-800 text-white flex flex-col">
+      <div class="p-4 border-b border-blue-700">
+        <h1 class="text-xl font-bold">Student Portal</h1>
+        <p class="text-sm text-blue-300">Welcome back!</p>
+      </div>
+      
+      <nav class="flex-1 px-4 py-6 space-y-2">
+        <a href="#dashboard" class="nav-link active block py-2 px-3 rounded hover:bg-blue-700 transition flex items-center space-x-2">
+          <i class="fas fa-tachometer-alt w-5"></i>
+          <span>Dashboard</span>
+        </a>
+        <a href="#transport" class="nav-link block py-2 px-3 rounded hover:bg-blue-700 transition flex items-center space-x-2">
+          <i class="fas fa-bus w-5"></i>
+          <span>My Transport</span>
+        </a>
+        <a href="#profile" class="nav-link block py-2 px-3 rounded hover:bg-blue-700 transition flex items-center space-x-2">
+          <i class="fas fa-user w-5"></i>
+          <span>My Profile</span>
+        </a>
+        <a href="#feedback" class="nav-link block py-2 px-3 rounded hover:bg-blue-700 transition flex items-center space-x-2">
+          <i class="fas fa-comment w-5"></i>
+          <span>Feedback</span>
+        </a>
+        <a href="#notifications" class="nav-link block py-2 px-3 rounded hover:bg-blue-700 transition flex items-center space-x-2">
+          <i class="fas fa-bell w-5"></i>
+          <span>Announcements</span>
+        </a>
+        <a href="#" id="logoutBtn" class="block py-2 px-3 rounded hover:bg-blue-700 transition flex items-center space-x-2 text-red-200 hover:text-red-100 mt-4">
+          <i class="fas fa-sign-out-alt w-5"></i>
+          <span>Logout</span>
+        </a>
+      </nav>
+    </div>
+
+    <!-- Main Content -->
+    <div class="flex-1 overflow-y-auto">
+      <div class="p-8">
+        <div id="globalError" class="hidden mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg"></div>
+        
+        <!-- Dashboard Section -->
+        <div id="dashboardSection" class="section-content active">
+          <h2 class="text-2xl font-bold mb-6">Student Dashboard</h2>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+            <div class="bg-white p-6 rounded-lg shadow">
+              <h3 class="font-semibold text-gray-700 mb-2">My Bus</h3>
+              <p id="quickBusInfo" class="text-2xl font-bold text-blue-600">Loading...</p>
+            </div>
+            <div class="bg-white p-6 rounded-lg shadow">
+              <h3 class="font-semibold text-gray-700 mb-2">Status</h3>
+              <p id="busStatus" class="text-2xl font-bold text-green-600">Loading...</p>
+            </div>
+            <div class="bg-white p-6 rounded-lg shadow">
+              <h3 class="font-semibold text-gray-700 mb-2">Notifications</h3>
+              <p id="notificationCount" class="text-2xl font-bold text-orange-600">0</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Transport Section -->
+        <div id="transportSection" class="section-content">
+          <h2 class="text-2xl font-bold mb-6">My Transport</h2>
+          <div class="bg-white p-6 rounded-lg shadow">
+            <h3 class="font-semibold text-gray-700 mb-4">Bus Location</h3>
+            <div id="map" class="rounded-lg border"></div>
+          </div>
+        </div>
+
+        <!-- Profile Section -->
+        <div id="profileSection" class="section-content">
+          <h2 class="text-2xl font-bold mb-6">My Profile</h2>
+          <div class="bg-white p-6 rounded-lg shadow">
+            <p>Profile information will be displayed here.</p>
+          </div>
+        </div>
+
+        <!-- Feedback Section -->
+        <div id="feedbackSection" class="section-content">
+          <h2 class="text-2xl font-bold mb-6">Feedback</h2>
+          <div class="bg-white p-6 rounded-lg shadow">
+            <form id="feedbackForm">
+              <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Subject</label>
+                <input type="text" id="feedbackTitle" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+              </div>
+              <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Message</label>
+                <textarea id="feedbackMessage" rows="4" class="w-full px-3 py-2 border border-gray-300 rounded-lg"></textarea>
+              </div>
+              <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">Submit Feedback</button>
+            </form>
+          </div>
+        </div>
+
+        <!-- Notifications Section -->
+        <div id="notificationsSection" class="section-content">
+          <h2 class="text-2xl font-bold mb-6">Announcements</h2>
+          <div class="bg-white p-6 rounded-lg shadow">
+            <p>Announcements will be displayed here.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    console.log('Script started');
+    
+    // Show section function
+    function showSection(sectionName) {
+      console.log('showSection called with:', sectionName);
+      
+      // Hide all sections
+      document.querySelectorAll('.section-content').forEach(section => {
+        section.classList.remove('active');
+      });
+      
+      // Remove active from nav links
+      document.querySelectorAll('.nav-link').forEach(link => {
+        link.classList.remove('active');
+      });
+      
+      // Show target section
+      const targetSection = document.getElementById(sectionName + 'Section');
+      if (targetSection) {
+        targetSection.classList.add('active');
+        console.log('Section shown:', sectionName);
+      } else {
+        console.error('Section not found:', sectionName + 'Section');
+      }
+      
+      // Activate nav link
+      const activeLink = document.querySelector(`[href="#${sectionName}"]`);
+      if (activeLink) {
+        activeLink.classList.add('active');
+      }
+    }
+    
+    // Setup navigation
+    function setupNavigation() {
+      console.log('Setting up navigation...');
+      
+      const navLinks = document.querySelectorAll('.nav-link');
+      console.log('Found nav links:', navLinks.length);
+      
+      navLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+          e.preventDefault();
+          const href = this.getAttribute('href');
+          if (href && href.startsWith('#')) {
+            const section = href.substring(1);
+            console.log('Clicked section:', section);
+            showSection(section);
+          }
+        });
+      });
+      
+      // Setup logout
+      const logoutBtn = document.getElementById('logoutBtn');
+      if (logoutBtn) {
+        logoutBtn.addEventListener('click', function(e) {
+          e.preventDefault();
+          console.log('Logout clicked');
+          alert('Logout functionality - would redirect to login.html');
+        });
+      }
+    }
+    
+    // Initialize when DOM is ready
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('DOM loaded, initializing...');
+      setupNavigation();
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,2536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Dashboard | Bus Management System</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Montserrat', Arial, sans-serif;
+    }
+    .sidebar {
+      transition: all 0.3s;
+    }
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+        position: fixed;
+        z-index: 50;
+        height: 100vh;
+      }
+      .sidebar.active {
+        transform: translateX(0);
+      }
+    }
+    .sidebar.closed {
+      display: none !important;
+    }
+    .nav-link.active {
+      background-color: #1e40af;
+      color: white;
+    }
+    .nav-link.active:hover {
+      background-color: #1e3a8a;
+    }
+    body.sidebar-closed .md\:ml-64 {
+      margin-left: 0 !important;
+    }
+  </style>
+</head>
+<body class="bg-gray-50 min-h-screen font-sans">
+  <!-- Mobile Menu Button -->
+  <button id="mobileMenuButton" class="md:hidden fixed top-4 left-4 z-50 bg-white p-2 rounded shadow-lg">
+    <i class="fas fa-bars text-gray-700"></i>
+  </button>
+
+  <!-- Sidebar Toggle Button (always visible) -->
+  <button id="sidebarToggleBtn" class="fixed top-4 left-4 z-50 bg-white p-2 rounded shadow-lg md:top-6 md:left-6">
+    <i class="fas fa-bars text-gray-700"></i>
+  </button>
+
+  <!-- Sidebar Navigation -->
+  <div class="sidebar bg-blue-800 text-white w-64 fixed h-full overflow-y-auto">
+    <div class="p-4 flex items-center justify-center border-b border-blue-700">
+      <h1 class="text-xl font-bold">Bus Management System</h1>
+    </div>
+    
+    <nav class="p-4 space-y-1">
+      <a href="#dashboard" class="nav-link block py-2 px-3 rounded hover:bg-blue-700 transition flex items-center space-x-2">
+        <i class="fas fa-tachometer-alt w-5"></i>
+        <span>Dashboard</span>
+      </a>
+      <a href="#buses" class="nav-link block py-2 px-3 rounded hover:bg-blue-700 transition flex items-center space-x-2">
+        <i class="fas fa-bus w-5"></i>
+        <span>Bus Management</span>
+      </a>
+      <a href="#assignments" class="nav-link block py-2 px-3 rounded hover:bg-blue-700 transition flex items-center space-x-2">
+        <i class="fas fa-tasks w-5"></i>
+        <span>Bus Assignments</span>
+      </a>
+      <a href="#routes" class="nav-link block py-2 px-3 rounded hover:bg-blue-700 transition flex items-center space-x-2">
+        <i class="fas fa-route w-5"></i>
+        <span>Route Management</span>
+      </a>
+      <a href="#stops" class="nav-link block py-2 px-3 rounded hover:bg-blue-700 transition flex items-center space-x-2">
+        <i class="fas fa-map-marker-alt w-5"></i>
+        <span>Stop Management</span>
+      </a>
+      <a href="#feedback" class="nav-link block py-2 px-3 rounded hover:bg-blue-700 transition flex items-center space-x-2">
+        <i class="fas fa-comments w-5"></i>
+        <span>Student Feedback</span>
+      </a>
+      <a href="#notifications" class="nav-link block py-2 px-3 rounded hover:bg-blue-700 transition flex items-center space-x-2">
+        <i class="fas fa-bell w-5"></i>
+        <span>Notifications</span>
+      </a>
+      <a href="#students" class="nav-link block py-2 px-3 rounded hover:bg-blue-700 transition flex items-center space-x-2">
+        <i class="fas fa-user-graduate w-5"></i>
+        <span>Student Management</span>
+      </a>
+      <a href="#" id="logoutBtn" class="block py-2 px-3 rounded hover:bg-blue-700 transition flex items-center space-x-2 text-red-200 hover:text-red-100 mt-4">
+        <i class="fas fa-sign-out-alt w-5"></i>
+        <span>Logout</span>
+      </a>
+    </nav>
+    
+    <div class="p-4 border-t border-blue-700 mt-auto">
+      <p class="text-xs text-blue-300">Admin Portal v2.0</p>
+      <p class="text-xs text-blue-400">© 2023 University Transport</p>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="md:ml-64 p-4 md:p-6">
+    <!-- Header -->
+    <header class="bg-white rounded-lg shadow p-4 mb-6 flex justify-between items-center">
+      <h1 class="text-2xl font-bold text-gray-800" id="sectionTitle">Dashboard</h1>
+      <div class="flex items-center space-x-4">
+        <div class="hidden md:block text-right">
+          <p class="text-sm font-medium" id="adminName">Admin</p>
+          <p class="text-xs text-gray-500" id="adminEmail">Loading...</p>
+        </div>
+      </div>
+    </header>
+
+    <!-- Dashboard Content -->
+    <div class="space-y-6">
+      <!-- Dashboard Overview -->
+      <div id="dashboardSection" class="section-content">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+          <div class="bg-white rounded-lg shadow p-4">
+            <div class="flex items-center space-x-4">
+              <div class="p-3 rounded-full bg-blue-100 text-blue-600">
+                <i class="fas fa-users text-xl"></i>
+              </div>
+              <div>
+                <p class="text-sm text-gray-500">Total Students</p>
+                <p id="totalStudents" class="text-2xl font-bold">0</p>
+              </div>
+            </div>
+          </div>
+          
+          <div class="bg-white rounded-lg shadow p-4">
+            <div class="flex items-center space-x-4">
+              <div class="p-3 rounded-full bg-green-100 text-green-600">
+                <i class="fas fa-bus text-xl"></i>
+              </div>
+              <div>
+                <p class="text-sm text-gray-500">Active Buses</p>
+                <p id="activeBuses" class="text-2xl font-bold">0</p>
+              </div>
+            </div>
+          </div>
+          
+          <div class="bg-white rounded-lg shadow p-4">
+            <div class="flex items-center space-x-4">
+              <div class="p-3 rounded-full bg-purple-100 text-purple-600">
+                <i class="fas fa-route text-xl"></i>
+              </div>
+              <div>
+                <p class="text-sm text-gray-500">Routes</p>
+                <p id="totalRoutes" class="text-2xl font-bold">0</p>
+              </div>
+            </div>
+          </div>
+          
+          <div class="bg-white rounded-lg shadow p-4">
+            <div class="flex items-center space-x-4">
+              <div class="p-3 rounded-full bg-yellow-100 text-yellow-600">
+                <i class="fas fa-comments text-xl"></i>
+              </div>
+              <div>
+                <p class="text-sm text-gray-500">New Feedback</p>
+                <p id="newFeedback" class="text-2xl font-bold">0</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow p-6">
+          <h2 class="text-xl font-semibold mb-4">Recent Activity</h2>
+          <div id="recentActivity" class="space-y-3">
+            <div class="p-3 text-center text-gray-500">
+              <i class="fas fa-spinner fa-spin"></i> Loading activity...
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Dashboard Real-Time Sections (only Feedback and Notifications) -->
+      <div id="liveDashboardGrid" class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <!-- Live Feedback Feed -->
+        <div class="bg-white rounded-lg shadow p-4">
+          <h3 class="text-lg font-semibold mb-2">Live Feedback Feed</h3>
+          <ul id="liveFeedbackFeed" class="space-y-2 text-sm text-gray-700">
+            <li class="text-gray-400 text-center"><i class="fas fa-spinner fa-spin"></i> Loading...</li>
+          </ul>
+        </div>
+        <!-- Live Notifications Feed -->
+        <div class="bg-white rounded-lg shadow p-4">
+          <h3 class="text-lg font-semibold mb-2">Live Notifications</h3>
+          <ul id="liveNotificationsFeed" class="space-y-2 text-sm text-gray-700">
+            <li class="text-gray-400 text-center"><i class="fas fa-spinner fa-spin"></i> Loading...</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Bus Management Section -->
+      <div id="busesSection" class="section-content hidden">
+        <div class="bg-white rounded-lg shadow p-6">
+          <h2 class="text-xl font-semibold mb-4">Add New Bus</h2>
+          <form id="busForm" class="space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label for="busNumber" class="block text-sm font-medium text-gray-700 mb-1">Bus Number</label>
+                <input type="text" id="busNumber" placeholder="Bus Number" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400">
+              </div>
+              <div>
+                <label for="busRouteSelect" class="block text-sm font-medium text-gray-700 mb-1">Route</label>
+                <select id="busRouteSelect" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400">
+                  <option value="">Select Route</option>
+                  <!-- Route options will be populated by JS -->
+                </select>
+              </div>
+              <div>
+                <label for="departure" class="block text-sm font-medium text-gray-700 mb-1">Departure Time</label>
+                <input type="time" id="departure" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400">
+              </div>
+              <div>
+                <label for="seatsTotal" class="block text-sm font-medium text-gray-700 mb-1">Total Seats</label>
+                <input type="number" id="seatsTotal" placeholder="Total Seats" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400">
+              </div>
+            </div>
+            <button type="submit" class="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition flex items-center justify-center space-x-2">
+              <i class="fas fa-bus"></i>
+              <span>Add Bus</span>
+            </button>
+          </form>
+        </div>
+
+        <div class="bg-white rounded-lg shadow p-6 mt-6">
+          <h2 class="text-xl font-semibold mb-4">Bus List</h2>
+          <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Bus Number</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Route</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Departure</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total Seats</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Available Seats</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="busList" class="bg-white divide-y divide-gray-200">
+                <tr>
+                  <td colspan="6" class="px-6 py-4 text-center text-gray-500">
+                    <i class="fas fa-spinner fa-spin"></i> Loading buses...
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bus Assignments Section -->
+      <div id="assignmentsSection" class="section-content hidden">
+        <div class="bg-white rounded-lg shadow p-6">
+          <h2 class="text-xl font-semibold mb-4">Assign Bus to Student</h2>
+          <form id="assignForm" class="space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label for="studentSelect" class="block text-sm font-medium text-gray-700 mb-1">Student</label>
+                <select id="studentSelect" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" required>
+                  <option value="">Select Student</option>
+                </select>
+              </div>
+              <div>
+                <label for="busSelect" class="block text-sm font-medium text-gray-700 mb-1">Bus</label>
+                <select id="busSelect" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" required>
+                  <option value="">Select Bus</option>
+                </select>
+              </div>
+            </div>
+            <button type="submit" class="w-full bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700 transition flex items-center justify-center space-x-2">
+              <i class="fas fa-tasks"></i>
+              <span>Assign Bus</span>
+            </button>
+            <p id="assignMsg" class="text-green-600 font-semibold text-center"></p>
+          </form>
+        </div>
+
+        <div class="bg-white rounded-lg shadow p-6 mt-6">
+          <h2 class="text-xl font-semibold mb-4">Current Assignments</h2>
+          <div class="flex flex-col md:flex-row md:items-center md:space-x-4 mb-4">
+            <input id="searchStudent" type="text" placeholder="Search student name/email..." class="mb-2 md:mb-0 px-4 py-2 border rounded w-full md:w-64" />
+            <select id="filterBus" class="px-4 py-2 border rounded w-full md:w-64">
+              <option value="">All Buses</option>
+            </select>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Student</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Assigned Bus</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Assigned On</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="assignmentList" class="bg-white divide-y divide-gray-200">
+                <tr>
+                  <td colspan="4" class="px-6 py-4 text-center text-gray-500">
+                    <i class="fas fa-spinner fa-spin"></i> Loading assignments...
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Routes Management Section -->
+      <div id="routesSection" class="section-content hidden">
+        <div class="bg-white rounded-lg shadow p-6 mb-6">
+          <h2 class="text-xl font-semibold mb-4">Add New Route</h2>
+          <form id="addRouteForm" class="space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label for="routeName" class="block text-sm font-medium text-gray-700 mb-1">Route Name</label>
+                <input type="text" id="routeName" placeholder="Route Name" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" />
+              </div>
+              <div>
+                <label for="routeDescription" class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                <input type="text" id="routeDescription" placeholder="Description" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" />
+              </div>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Assign Stops (Order matters)</label>
+              <div id="allStopsList" class="bg-gray-50 border rounded p-2 max-h-40 overflow-y-auto mb-2">
+                <!-- All stops with checkboxes will be rendered here -->
+              </div>
+              <div class="mt-2">
+                <label class="block text-xs font-semibold text-gray-600 mb-1">Assigned Stops (Drag to reorder or use up/down)</label>
+                <ul id="assignedStopsList" class="bg-white border rounded p-2 min-h-[40px]">
+                  <!-- Assigned stops will be rendered here -->
+                </ul>
+              </div>
+            </div>
+            <div id="addRouteMsg" class="text-sm text-red-500"></div>
+            <button type="submit" class="bg-indigo-600 text-white py-2 px-6 rounded-lg hover:bg-indigo-700 transition">Add Route</button>
+          </form>
+        </div>
+        <div class="bg-white rounded-lg shadow p-6">
+          <h2 class="text-xl font-semibold mb-4">All Routes</h2>
+          <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+              <thead>
+                <tr>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stops (Ordered)</th>
+                  <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="routeList" class="bg-white divide-y divide-gray-200">
+                <!-- Routes will be rendered here -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <!-- Edit Route Modal -->
+      <div id="editRouteModal" class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md relative">
+          <button id="closeEditRouteModal" class="absolute top-2 right-2 text-gray-400 hover:text-gray-700 text-xl">&times;</button>
+          <h2 class="text-xl font-semibold mb-4">Edit Route</h2>
+          <form id="editRouteForm" class="space-y-4">
+            <div>
+              <label for="editRouteName" class="block text-sm font-medium text-gray-700 mb-1">Route Name</label>
+              <input type="text" id="editRouteName" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" />
+            </div>
+            <div>
+              <label for="editRouteDescription" class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+              <input type="text" id="editRouteDescription" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Assign Stops (Order matters)</label>
+              <div id="editAllStopsList" class="bg-gray-50 border rounded p-2 max-h-40 overflow-y-auto mb-2">
+                <!-- All stops with checkboxes will be rendered here -->
+              </div>
+              <div class="mt-2">
+                <label class="block text-xs font-semibold text-gray-600 mb-1">Assigned Stops (Drag to reorder or use up/down)</label>
+                <ul id="editAssignedStopsList" class="bg-white border rounded p-2 min-h-[40px]">
+                  <!-- Assigned stops will be rendered here -->
+                </ul>
+              </div>
+            </div>
+            <div id="editRouteMsg" class="text-sm text-red-500"></div>
+            <div class="flex space-x-2">
+              <button type="submit" class="flex-1 bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700 transition flex items-center justify-center space-x-2">
+                <i class="fas fa-save"></i>
+                <span>Save Changes</span>
+              </button>
+              <button type="button" id="cancelEditRouteBtn" class="flex-1 bg-gray-200 text-gray-700 py-2 rounded-lg hover:bg-gray-300 transition">Cancel</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Stops Management Section -->
+      <div id="stopsSection" class="section-content hidden">
+        <div class="bg-white rounded-lg shadow p-6 mb-6">
+          <h2 class="text-xl font-semibold mb-4">Add New Stop</h2>
+          <form id="addStopForm" class="space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label for="stopName" class="block text-sm font-medium text-gray-700 mb-1">Stop Name</label>
+                <input type="text" id="stopName" placeholder="Stop Name" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" />
+              </div>
+              <div>
+                <label for="stopLocation" class="block text-sm font-medium text-gray-700 mb-1">Location (lat,lng)</label>
+                <input type="text" id="stopLocation" placeholder="e.g. 40.7128,-74.0060" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" />
+              </div>
+            </div>
+            <div id="addStopMsg" class="text-sm text-red-500"></div>
+            <button type="submit" class="bg-indigo-600 text-white py-2 px-6 rounded-lg hover:bg-indigo-700 transition">Add Stop</button>
+          </form>
+        </div>
+        <div class="bg-white rounded-lg shadow p-6">
+          <h2 class="text-xl font-semibold mb-4">All Stops</h2>
+          <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+              <thead>
+                <tr>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
+                  <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="stopsList" class="bg-white divide-y divide-gray-200">
+                <!-- Stops will be rendered here -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <!-- Edit Stop Modal -->
+      <div id="editStopModal" class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md relative">
+          <button id="closeEditStopModal" class="absolute top-2 right-2 text-gray-400 hover:text-gray-700 text-xl">&times;</button>
+          <h2 class="text-xl font-semibold mb-4">Edit Stop</h2>
+          <form id="editStopForm" class="space-y-4">
+            <div>
+              <label for="editStopName" class="block text-sm font-medium text-gray-700 mb-1">Stop Name</label>
+              <input type="text" id="editStopName" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" />
+            </div>
+            <div>
+              <label for="editStopLocation" class="block text-sm font-medium text-gray-700 mb-1">Location (lat,lng)</label>
+              <input type="text" id="editStopLocation" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" />
+            </div>
+            <div id="editStopMsg" class="text-sm text-red-500"></div>
+            <div class="flex space-x-2">
+              <button type="submit" class="flex-1 bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700 transition flex items-center justify-center space-x-2">
+                <i class="fas fa-save"></i>
+                <span>Save Changes</span>
+              </button>
+              <button type="button" id="cancelEditStopBtn" class="flex-1 bg-gray-200 text-gray-700 py-2 rounded-lg hover:bg-gray-300 transition">Cancel</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Feedback Section -->
+      <div id="feedbackSection" class="section-content hidden">
+        <div class="bg-white rounded-lg shadow p-6">
+          <h2 class="text-xl font-semibold mb-4">Student Feedback</h2>
+          <div id="feedbackList" class="space-y-4">
+            <div class="p-4 text-center text-gray-500">
+              <i class="fas fa-spinner fa-spin"></i> Loading feedback...
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Notifications Section -->
+      <div id="notificationsSection" class="section-content hidden">
+        <div class="bg-white rounded-lg shadow p-6 mb-6">
+          <h2 class="text-xl font-semibold mb-4">Send Notification</h2>
+          <form id="sendNotificationForm" class="space-y-4">
+            <div>
+              <label for="notificationRecipientType" class="block text-sm font-medium text-gray-700 mb-1">Send To</label>
+              <select id="notificationRecipientType" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400">
+                <option value="all">All Students</option>
+                <option value="bus">All Students of a Bus</option>
+                <option value="student">Single Student</option>
+              </select>
+            </div>
+            <div id="notificationBusField" class="hidden">
+              <label for="notificationBusSelect" class="block text-sm font-medium text-gray-700 mb-1">Select Bus</label>
+              <select id="notificationBusSelect" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400">
+                <option value="">Select Bus</option>
+              </select>
+            </div>
+            <div id="notificationStudentField" class="hidden">
+              <label for="notificationStudentSelect" class="block text-sm font-medium text-gray-700 mb-1">Select Student</label>
+              <select id="notificationStudentSelect" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400">
+                <option value="">Select Student</option>
+              </select>
+            </div>
+            <div>
+              <label for="notificationTitle" class="block text-sm font-medium text-gray-700 mb-1">Title</label>
+              <input type="text" id="notificationTitle" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" />
+            </div>
+            <div>
+              <label for="notificationMsg" class="block text-sm font-medium text-gray-700 mb-1">Message</label>
+              <textarea id="notificationMsg" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" rows="3"></textarea>
+            </div>
+            <div id="notificationFormMsg" class="text-sm text-red-500"></div>
+            <button type="submit" class="bg-indigo-600 text-white py-2 px-6 rounded-lg hover:bg-indigo-700 transition">Send Notification</button>
+          </form>
+        </div>
+        <div class="bg-white rounded-lg shadow p-6">
+          <h2 class="text-xl font-semibold mb-4">All Notifications</h2>
+          <div id="notificationList" class="space-y-4">
+            <!-- Notifications will be rendered here -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Student Management Section -->
+      <div id="studentsSection" class="section-content hidden">
+        <div class="bg-white rounded-lg shadow p-6 mb-6">
+          <h2 class="text-xl font-semibold mb-4">Add New Student</h2>
+          <form id="addStudentForm" class="space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label for="studentName" class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                <input type="text" id="studentName" placeholder="Full Name" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" />
+              </div>
+              <div>
+                <label for="studentEmail" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                <input type="email" id="studentEmail" placeholder="Email" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" />
+              </div>
+              <div>
+                <label for="studentPassword" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                <input type="password" id="studentPassword" placeholder="Password" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" />
+              </div>
+              <div>
+                <label for="studentPhone" class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+                <input type="text" id="studentPhone" placeholder="Phone Number" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" />
+              </div>
+            </div>
+            <div id="studentFormMsg" class="text-sm text-red-500"></div>
+            <button type="submit" class="bg-indigo-600 text-white py-2 px-6 rounded-lg hover:bg-indigo-700 transition">Add Student</button>
+          </form>
+        </div>
+        <div class="bg-white rounded-lg shadow p-6">
+          <h2 class="text-xl font-semibold mb-4">All Students</h2>
+          <div class="flex flex-col md:flex-row md:items-center md:space-x-4 mb-4">
+            <input id="searchStudentMgmt" type="text" placeholder="Search student name/email..." class="mb-2 md:mb-0 px-4 py-2 border rounded w-full md:w-64" />
+            <select id="filterStudentBus" class="px-4 py-2 border rounded w-full md:w-64">
+              <option value="">All Buses</option>
+            </select>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+              <thead>
+                <tr>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Phone</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Assigned Bus</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Assigned On</th>
+                  <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="studentMgmtList" class="bg-white divide-y divide-gray-200">
+                <!-- Students will be rendered here -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <!-- Student Details Modal -->
+        <div id="studentDetailsModal" class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 hidden">
+          <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md relative">
+            <button id="closeStudentDetailsModal" class="absolute top-2 right-2 text-gray-400 hover:text-gray-700 text-xl">&times;</button>
+            <h2 class="text-xl font-semibold mb-4">Student Details</h2>
+            <div id="studentDetailsContent" class="space-y-2">
+              <!-- Student details will be rendered here -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Firebase SDKs -->
+  <script type="module">
+    import { firebaseConfig } from './js/firebaseConfig.js';
+    // ✅ Firebase Imports
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { 
+      getAuth, 
+      onAuthStateChanged, 
+      createUserWithEmailAndPassword,
+      signOut
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import {
+      getFirestore,
+      collection,
+      addDoc,
+      getDocs,
+      deleteDoc,
+      updateDoc,
+      doc,
+      setDoc,
+      query,
+      where,
+      onSnapshot,
+      orderBy,
+      limit,
+      deleteField,
+      getDoc
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    // ✅ Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // Global variables
+    let currentSection = 'dashboard';
+
+    // Initialize the page
+    document.addEventListener('DOMContentLoaded', () => {
+      setupNavigation();
+      setupEventListeners();
+      checkAuthState();
+      populateStopsSelect('routeStops');
+
+      // Real-time Live Feedback Feed
+      const liveFeedbackFeed = document.getElementById('liveFeedbackFeed');
+      onSnapshot(query(collection(db, 'feedback'), orderBy('createdAt', 'desc'), limit(5)), (snapshot) => {
+        liveFeedbackFeed.innerHTML = '';
+        if (snapshot.empty) {
+          liveFeedbackFeed.innerHTML = '<li class="text-gray-400 text-center">No feedback yet</li>';
+          return;
+        }
+        snapshot.forEach(docSnap => {
+          const data = docSnap.data();
+          let time = '';
+          if (data.createdAt && data.createdAt.toDate) {
+            time = new Date(data.createdAt.toDate()).toLocaleTimeString();
+          }
+          liveFeedbackFeed.innerHTML += `<li><b>${data.studentName || data.email || 'Student'}</b>: ${data.message} <span class='text-xs text-gray-400'>${time}</span></li>`;
+        });
+      });
+
+      // Real-time Live Notifications Feed
+      const liveNotificationsFeed = document.getElementById('liveNotificationsFeed');
+      onSnapshot(query(collection(db, 'notifications'), orderBy('createdAt', 'desc'), limit(5)), (snapshot) => {
+        liveNotificationsFeed.innerHTML = '';
+        if (snapshot.empty) {
+          liveNotificationsFeed.innerHTML = '<li class="text-gray-400 text-center">No notifications yet</li>';
+          return;
+        }
+        snapshot.forEach(docSnap => {
+          const data = docSnap.data();
+          let recipient = 'All';
+          if (data.recipientType === 'bus') recipient = `Bus`;
+          if (data.recipientType === 'student') recipient = 'Student';
+          let time = '';
+          if (data.createdAt && data.createdAt.toDate) {
+            time = new Date(data.createdAt.toDate()).toLocaleTimeString();
+          }
+          liveNotificationsFeed.innerHTML += `<li><b>${data.title}</b> <span class='text-xs text-gray-400'>${time}</span><br/><span class='text-xs text-gray-500'>To: ${recipient}</span></li>`;
+        });
+      });
+    });
+
+    // Check authentication state
+    function checkAuthState() {
+      onAuthStateChanged(auth, async (user) => {
+        if (!user) {
+          window.location.href = "login.html";
+          return;
+        }
+        // Fetch admin name from users collection
+        try {
+          const userDoc = await getDoc(doc(db, "users", user.uid));
+          if (userDoc.exists()) {
+            const data = userDoc.data();
+            document.getElementById('adminName').textContent = data.name || 'Admin';
+            document.getElementById('adminEmail').textContent = data.email || user.email;
+          } else {
+            document.getElementById('adminName').textContent = 'Admin';
+            document.getElementById('adminEmail').textContent = user.email;
+          }
+        } catch (e) {
+          document.getElementById('adminName').textContent = 'Admin';
+          document.getElementById('adminEmail').textContent = user.email;
+        }
+        // Load initial data
+        loadDashboardStats();
+        loadUsers();
+        fetchBuses();
+        loadStudents();
+        loadBuses();
+        loadAssignments();
+        loadFeedbacks();
+        loadRoutes();
+        loadRoutesToSelect();
+        loadStops();
+        loadNotifications();
+      });
+    }
+
+    // Setup navigation
+    function setupNavigation() {
+      // Mobile menu toggle
+      document.getElementById('mobileMenuButton').addEventListener('click', function() {
+        document.querySelector('.sidebar').classList.toggle('active');
+      });
+
+      // Navigation links
+      document.querySelectorAll('.nav-link').forEach(link => {
+        link.addEventListener('click', function(e) {
+          e.preventDefault();
+          const section = this.getAttribute('href').substring(1);
+          showSection(section);
+        });
+      });
+
+      // Logout button
+      document.getElementById('logoutBtn').addEventListener('click', async function(e) {
+        e.preventDefault();
+        try {
+          await signOut(auth);
+          window.location.href = "login.html";
+        } catch (error) {
+          console.error("Logout error:", error);
+        }
+      });
+    }
+
+    // Show specific section
+    function showSection(section) {
+      // Hide all sections
+      document.querySelectorAll('.section-content').forEach(el => {
+        el.classList.add('hidden');
+      });
+      
+      // Show selected section
+      document.getElementById(`${section}Section`).classList.remove('hidden');
+      
+      // Update active nav link
+      document.querySelectorAll('.nav-link').forEach(link => {
+        link.classList.remove('active');
+      });
+      document.querySelector(`.nav-link[href="#${section}"]`).classList.add('active');
+      
+      // Update title
+      document.getElementById('sectionTitle').textContent = section.charAt(0).toUpperCase() + section.slice(1);
+      
+      currentSection = section;
+      // Show/hide live feedback and notifications grid only on dashboard
+      const liveGrid = document.getElementById('liveDashboardGrid');
+      if (liveGrid) {
+        if (section === 'dashboard') {
+          liveGrid.classList.remove('hidden');
+        } else {
+          liveGrid.classList.add('hidden');
+        }
+      }
+      // --- ADDED: Refresh stops select when showing routes section ---
+      if (section === 'routes') {
+        populateStopsSelect('routeStops');
+      }
+      if (section === 'notifications' && document.getElementById('notificationList')) {
+        loadNotifications();
+      }
+    }
+
+    // Setup event listeners for forms
+    function setupEventListeners() {
+      // User form
+      document.getElementById('addUserForm')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const name = document.getElementById('newName').value.trim();
+        const email = document.getElementById('newEmail').value.trim();
+        const password = document.getElementById('newPassword').value.trim();
+        const role = document.getElementById('newRole').value;
+
+        try {
+          const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+          const uid = userCredential.user.uid;
+
+          await setDoc(doc(db, "users", uid), {
+            uid,
+            name,
+            email,
+            role,
+            createdAt: new Date()
+          });
+
+          document.getElementById('formMsg').textContent = "✅ User created successfully!";
+          document.getElementById('addUserForm').reset();
+          loadUsers();
+          loadStudents();
+          loadDashboardStats();
+          
+          setTimeout(() => {
+            document.getElementById('formMsg').textContent = "";
+          }, 3000);
+        } catch (error) {
+          document.getElementById('formMsg').textContent = `❌ ${error.message}`;
+        }
+      });
+
+      // Bus form
+      document.getElementById('busForm')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const busNumber = document.getElementById('busNumber').value.trim();
+        const routeId = document.getElementById('busRouteSelect').value;
+        const departure = document.getElementById('departure').value;
+        const seatsTotal = parseInt(document.getElementById('seatsTotal').value);
+        if (!routeId) {
+          alert('Please select a route.');
+          return;
+        }
+        try {
+          await addDoc(collection(db, "buses"), {
+            busNumber,
+            route: routeId,
+            departure,
+            seatsTotal
+          });
+          document.getElementById('busForm').reset();
+          fetchBuses();
+          loadBuses();
+          loadDashboardStats();
+        } catch (err) {
+          alert("❌ " + err.message);
+        }
+      });
+
+      // Assignment form
+      document.getElementById('assignForm')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const studentId = document.getElementById('studentSelect').value;
+        const busId = document.getElementById('busSelect').value;
+        if (!studentId || !busId) {
+          document.getElementById('assignMsg').textContent = "❌ Select both student and bus.";
+          return;
+        }
+        try {
+          await updateDoc(doc(db, "students", studentId), {
+            assignedBus: busId,
+            assignedAt: new Date()
+          });
+          document.getElementById('assignMsg').textContent = "✅ Bus assigned successfully!";
+          document.getElementById('assignForm').reset();
+          loadAssignments();
+          setTimeout(() => {
+            document.getElementById('assignMsg').textContent = "";
+          }, 3000);
+        } catch (err) {
+          document.getElementById('assignMsg').textContent = `❌ ${err.message}`;
+        }
+      });
+
+      // Route form
+      document.getElementById('addRouteForm')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const name = document.getElementById('routeName').value.trim();
+        const desc = document.getElementById('routeDescription').value.trim();
+        if (!name) return;
+        try {
+          await addDoc(collection(db, "routes"), {
+            name,
+            description: desc,
+            stops: assignedStops,
+            createdAt: new Date()
+          });
+          document.getElementById('addRouteForm').reset();
+          assignedStops = [];
+          setupRouteStopsUI();
+          loadRoutes();
+          loadRoutesToSelect();
+          loadDashboardStats();
+        } catch (err) {
+          alert("❌ Failed to add route: " + err.message);
+        }
+      });
+
+      // Stop form
+      document.getElementById('addStopForm')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const stopName = document.getElementById('stopName').value.trim();
+        const location = document.getElementById('stopLocation').value.trim();
+        if (!stopName || !location) {
+          document.getElementById('addStopMsg').textContent = '❌ Stop name and location are required.';
+          return;
+        }
+
+        try {
+          await addDoc(collection(db, "stops"), {
+            stopName,
+            location,
+            createdAt: new Date()
+          });
+          document.getElementById('addStopForm').reset();
+          loadStops();
+        } catch (err) {
+          alert("❌ Failed to add stop: " + err.message);
+        }
+      });
+
+      // Notification form
+      document.getElementById('sendNotificationForm')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const recipientType = document.getElementById('notificationRecipientType').value;
+        const busId = document.getElementById('notificationBusSelect').value;
+        const studentId = document.getElementById('notificationStudentSelect').value;
+        const title = document.getElementById('notificationTitle').value.trim();
+        const message = document.getElementById('notificationMsg').value.trim();
+        const formMsg = document.getElementById('notificationFormMsg');
+        formMsg.textContent = '';
+        let recipientId = null;
+        if (recipientType === 'bus' && !busId) {
+          formMsg.textContent = 'Please select a bus.';
+          return;
+        }
+        if (recipientType === 'student' && !studentId) {
+          formMsg.textContent = 'Please select a student.';
+          return;
+        }
+        if (recipientType === 'bus') recipientId = busId;
+        if (recipientType === 'student') recipientId = studentId;
+        try {
+          await addDoc(collection(db, 'notifications'), {
+            title,
+            message,
+            recipientType,
+            recipientId: recipientId || null,
+            createdAt: new Date()
+          });
+          document.getElementById('sendNotificationForm').reset();
+          formMsg.textContent = '✅ Notification sent!';
+          loadNotifications();
+          setTimeout(() => { formMsg.textContent = ''; }, 2000);
+        } catch (err) {
+          formMsg.textContent = '❌ ' + err.message;
+        }
+      });
+
+      // Student form
+      document.getElementById('addStudentForm')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const name = document.getElementById('studentName').value.trim();
+        const email = document.getElementById('studentEmail').value.trim();
+        const password = document.getElementById('studentPassword').value.trim();
+        const phone = document.getElementById('studentPhone').value.trim();
+
+        try {
+          const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+          const uid = userCredential.user.uid;
+
+          await setDoc(doc(db, "students", uid), {
+            uid,
+            name,
+            email,
+            phone,
+            createdAt: new Date()
+          });
+
+          document.getElementById('studentFormMsg').textContent = "✅ Student created successfully!";
+          document.getElementById('addStudentForm').reset();
+          loadDashboardStats();
+          setTimeout(() => {
+            document.getElementById('studentFormMsg').textContent = "";
+          }, 3000);
+        } catch (error) {
+          document.getElementById('studentFormMsg').textContent = `❌ ${error.message}`;
+        }
+      });
+    }
+
+    // --------------------------------------------
+    // ✅ Dashboard Functions
+    // --------------------------------------------
+    async function loadDashboardStats() {
+      try {
+        const [studentsSnapshot, busesSnapshot, routesSnapshot, feedbackSnapshot] = await Promise.all([
+          getDocs(collection(db, "students")),
+          getDocs(collection(db, "buses")),
+          getDocs(collection(db, "routes")),
+          getDocs(collection(db, "feedback"))
+        ]);
+        // Update dashboard stats
+        document.getElementById('totalStudents').textContent = studentsSnapshot.size;
+        document.getElementById('activeBuses').textContent = busesSnapshot.size;
+        document.getElementById('totalRoutes').textContent = routesSnapshot.size;
+        document.getElementById('newFeedback').textContent = feedbackSnapshot.size;
+        // Load recent activity
+        loadRecentActivity();
+      } catch (error) {
+        console.error("Error loading dashboard stats:", error);
+      }
+    }
+
+    async function loadRecentActivity() {
+      const activityList = document.getElementById('recentActivity');
+      activityList.innerHTML = '<div class="p-3 text-center text-gray-500"><i class="fas fa-spinner fa-spin"></i> Loading activity...</div>';
+
+      try {
+        // Get the 5 most recent notifications
+        const notificationsSnapshot = await getDocs(
+          query(collection(db, "notifications"), orderBy("createdAt", "desc"), limit(5))
+        );
+
+        activityList.innerHTML = '';
+        if (notificationsSnapshot.empty) {
+          activityList.innerHTML = '<div class="p-3 text-center text-gray-500">No recent activity</div>';
+          return;
+        }
+
+        notificationsSnapshot.forEach(doc => {
+          const data = doc.data();
+          const activityItem = document.createElement('div');
+          activityItem.className = 'p-3 border-b border-gray-100 last:border-0';
+          activityItem.innerHTML = `
+            <div class="flex items-start space-x-3">
+              <div class="p-2 rounded-full bg-blue-100 text-blue-600">
+                <i class="fas fa-bell"></i>
+              </div>
+              <div>
+                <p class="font-medium">${data.title}</p>
+                <p class="text-sm text-gray-600">${data.message}</p>
+                <p class="text-xs text-gray-400 mt-1">${new Date(data.createdAt.toDate()).toLocaleString()}</p>
+              </div>
+            </div>
+          `;
+          activityList.appendChild(activityItem);
+        });
+      } catch (error) {
+        console.error("Error loading recent activity:", error);
+        activityList.innerHTML = '<div class="p-3 text-center text-red-500">Failed to load activity</div>';
+      }
+    }
+
+    // --------------------------------------------
+    // ✅ User Management Functions
+    // --------------------------------------------
+    async function loadUsers() {
+      const userList = document.getElementById('userList');
+      userList.innerHTML = '<tr><td colspan="4" class="px-6 py-4 text-center text-gray-500"><i class="fas fa-spinner fa-spin"></i> Loading users...</td></tr>';
+
+      try {
+        const snapshot = await getDocs(collection(db, "users"));
+        userList.innerHTML = '';
+
+        if (snapshot.empty) {
+          userList.innerHTML = '<tr><td colspan="4" class="px-6 py-4 text-center text-gray-500">No users found</td></tr>';
+          return;
+        }
+
+        snapshot.forEach(docSnap => {
+          const data = docSnap.data();
+          const row = document.createElement('tr');
+          row.className = 'hover:bg-gray-50';
+          row.innerHTML = `
+            <td class="px-6 py-4 whitespace-nowrap">${data.name || '—'}</td>
+            <td class="px-6 py-4 whitespace-nowrap">${data.email}</td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <span class="px-2 py-1 text-xs rounded-full ${data.role === 'admin' ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800'}">
+                ${data.role}
+              </span>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+              <button class="text-red-600 hover:text-red-900 deleteUser" data-id="${docSnap.id}">Delete</button>
+            </td>
+          `;
+          userList.appendChild(row);
+        });
+
+        // Add event listeners to delete buttons
+        document.querySelectorAll('.deleteUser').forEach(btn => {
+          btn.addEventListener('click', async () => {
+            if (confirm('Are you sure you want to delete this user?')) {
+              try {
+                // Note: In a real app, you would also delete the auth user
+                await deleteDoc(doc(db, "users", btn.dataset.id));
+                loadUsers();
+                loadStudents();
+                loadDashboardStats();
+              } catch (error) {
+                alert('Error deleting user: ' + error.message);
+              }
+            }
+          });
+        });
+      } catch (error) {
+        console.error("Error loading users:", error);
+        userList.innerHTML = '<tr><td colspan="4" class="px-6 py-4 text-center text-red-500">Error loading users</td></tr>';
+      }
+    }
+
+    // --------------------------------------------
+    // ✅ Bus Management Functions
+    // --------------------------------------------
+    async function fetchBuses() {
+      const busList = document.getElementById('busList');
+      busList.innerHTML = '<tr><td colspan="6" class="px-6 py-4 text-center text-gray-500"><i class="fas fa-spinner fa-spin"></i> Loading buses...</td></tr>';
+      try {
+        // Fetch all buses, students, and routes
+        const [busesSnap, studentsSnap, routesSnap] = await Promise.all([
+          getDocs(collection(db, "buses")),
+          getDocs(collection(db, "students")),
+          getDocs(collection(db, "routes"))
+        ]);
+        // Build routeId to name map
+        const routeMap = {};
+        routesSnap.forEach(doc => { routeMap[doc.id] = doc.data().name; });
+        // Count assigned students per bus
+        const assignedCounts = {};
+        studentsSnap.forEach(doc => {
+          const student = doc.data();
+          if (student.assignedBus) {
+            assignedCounts[student.assignedBus] = (assignedCounts[student.assignedBus] || 0) + 1;
+          }
+        });
+        busList.innerHTML = '';
+        if (busesSnap.empty) {
+          busList.innerHTML = '<tr><td colspan="6" class="px-6 py-4 text-center text-gray-500">No buses found</td></tr>';
+          return;
+        }
+        busesSnap.forEach(docSnap => {
+          const bus = docSnap.data();
+          const id = docSnap.id;
+          const totalSeats = bus.seatsTotal || 0;
+          const assigned = assignedCounts[id] || 0;
+          const availableSeats = totalSeats - assigned;
+          const routeName = routeMap[bus.route] || '-';
+          const row = document.createElement('tr');
+          row.className = 'hover:bg-gray-50';
+          row.innerHTML = `
+            <td class="px-6 py-4 whitespace-nowrap">${bus.busNumber}</td>
+            <td class="px-6 py-4">${routeName}</td>
+            <td class="px-6 py-4 whitespace-nowrap">${bus.departure || '-'}</td>
+            <td class="px-6 py-4 whitespace-nowrap">${totalSeats}</td>
+            <td class="px-6 py-4 whitespace-nowrap">${availableSeats}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+              <button class="text-indigo-600 hover:text-indigo-900 editBusBtn" data-id="${id}">Edit</button>
+              <button class="text-red-600 hover:text-red-900 deleteBus" data-id="${id}">Delete</button>
+            </td>
+          `;
+          busList.appendChild(row);
+        });
+      } catch (error) {
+        busList.innerHTML = '<tr><td colspan="6" class="px-6 py-4 text-center text-red-500">Error loading buses</td></tr>';
+      }
+    }
+
+    // --------------------------------------------
+    // ✅ Bus Assignment Functions
+    // --------------------------------------------
+    async function loadStudents() {
+      const studentSelect = document.getElementById('studentSelect');
+      if (!studentSelect) return;
+      
+      studentSelect.innerHTML = '<option value="">Select Student</option>';
+      
+      try {
+        const snapshot = await getDocs(collection(db, "students"));
+        snapshot.forEach(docSnap => {
+          const data = docSnap.data();
+          studentSelect.innerHTML += `<option value="${docSnap.id}">${data.name || data.email}</option>`;
+        });
+      } catch (error) {
+        console.error("Error loading students:", error);
+      }
+    }
+
+    async function loadBuses() {
+      const busSelect = document.getElementById('busSelect');
+      if (!busSelect) return;
+      
+      busSelect.innerHTML = '<option value="">Select Bus</option>';
+      
+      try {
+        const [busesSnap, routesSnap] = await Promise.all([
+          getDocs(collection(db, "buses")),
+          getDocs(collection(db, "routes"))
+        ]);
+        const routeMap = {};
+        routesSnap.forEach(doc => { routeMap[doc.id] = doc.data().name; });
+        busesSnap.forEach(docSnap => {
+          const data = docSnap.data();
+          const routeName = routeMap[data.route] || '';
+          busSelect.innerHTML += `<option value="${docSnap.id}">Bus No ${data.busNumber} (${routeName})</option>`;
+        });
+      } catch (error) {
+        console.error("Error loading buses:", error);
+      }
+    }
+
+    async function loadAssignments() {
+      const assignmentList = document.getElementById('assignmentList');
+      if (!assignmentList) return;
+      assignmentList.innerHTML = '<tr><td colspan="4" class="px-6 py-4 text-center text-gray-500"><i class="fas fa-spinner fa-spin"></i> Loading assignments...</td></tr>';
+      try {
+        // Fetch all students and buses
+        const [studentsSnap, busesSnap, routesSnap] = await Promise.all([
+          getDocs(collection(db, "students")),
+          getDocs(collection(db, "buses")),
+          getDocs(collection(db, "routes"))
+        ]);
+        const buses = {};
+        busesSnap.forEach(doc => { buses[doc.id] = doc.data(); });
+        const routeMap = {};
+        routesSnap.forEach(doc => { routeMap[doc.id] = doc.data().name; });
+        // Get search/filter values
+        const searchValue = (document.getElementById('searchStudent')?.value || '').toLowerCase();
+        const filterBus = document.getElementById('filterBus')?.value || '';
+        // Populate bus filter dropdown
+        const filterBusSelect = document.getElementById('filterBus');
+        if (filterBusSelect && filterBusSelect.options.length === 1) {
+          busesSnap.forEach(doc => {
+            const bus = doc.data();
+            const routeName = routeMap[bus.route] || '';
+            filterBusSelect.innerHTML += `<option value="${doc.id}">Bus No ${bus.busNumber} (${routeName})</option>`;
+          });
+        }
+        // Filter and display assignments
+        assignmentList.innerHTML = '';
+        let found = false;
+        studentsSnap.forEach(docSnap => {
+          const student = docSnap.data();
+          // Search/filter logic
+          if (searchValue && !(student.name?.toLowerCase().includes(searchValue) || student.email?.toLowerCase().includes(searchValue))) return;
+          if (filterBus && student.assignedBus !== filterBus) return;
+          found = true;
+          const bus = student.assignedBus ? buses[student.assignedBus] : null;
+          const routeName = bus && bus.route ? routeMap[bus.route] : '';
+          const assignedOn = student.assignedAt ? new Date(student.assignedAt.toDate ? student.assignedAt.toDate() : student.assignedAt).toLocaleString() : '-';
+          const row = document.createElement('tr');
+          row.className = 'hover:bg-gray-50';
+          row.innerHTML = `
+            <td class="px-6 py-4 whitespace-nowrap">
+              <p class="font-medium">${student.name || student.email}</p>
+              <p class="text-sm text-gray-500">${student.email}</p>
+            </td>
+            <td class="px-6 py-4">
+              <p class="font-medium">${bus ? `Bus No ${bus.busNumber} (${routeName})` : '-'}</p>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">${assignedOn}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+              <button class="text-indigo-600 hover:text-indigo-900 editAssignment" data-id="${docSnap.id}">Edit</button>
+            </td>
+          `;
+          assignmentList.appendChild(row);
+        });
+        if (!found) {
+          assignmentList.innerHTML = '<tr><td colspan="4" class="px-6 py-4 text-center text-gray-500">No assignments found</td></tr>';
+        }
+        // Edit button logic
+        document.querySelectorAll('.editAssignment').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const studentId = btn.dataset.id;
+            // Find current bus assignment for this student
+            const row = btn.closest('tr');
+            const busCell = row.querySelector('td:nth-child(2) p.font-medium');
+            const currentBusNumber = busCell ? busCell.textContent : '';
+            // Find busId by matching bus number (fallback)
+            let currentBusId = '';
+            for (const [id, bus] of Object.entries(buses)) {
+              if (bus.busNumber === currentBusNumber) {
+                currentBusId = id;
+                break;
+              }
+            }
+            showEditAssignmentModal(studentId, currentBusId);
+          });
+        });
+      } catch (error) {
+        assignmentList.innerHTML = `<tr><td colspan="4" class="px-6 py-4 text-center text-red-500">Error loading assignments: ${error.message}</td></tr>`;
+      }
+    }
+    // Add search/filter event listeners
+    document.getElementById('searchStudent')?.addEventListener('input', loadAssignments);
+    document.getElementById('filterBus')?.addEventListener('change', loadAssignments);
+
+    // --------------------------------------------
+    // ✅ Route Management Functions
+    // --------------------------------------------
+    async function loadRoutes() {
+      const routeList = document.getElementById('routeList');
+      if (!routeList) return;
+      routeList.innerHTML = '<tr><td colspan="4" class="px-6 py-4 text-center text-gray-500"><i class="fas fa-spinner fa-spin"></i> Loading routes...</td></tr>';
+      try {
+        // Fetch all routes and stops
+        const [routesSnap, stopsSnap] = await Promise.all([
+          getDocs(collection(db, 'routes')),
+          getDocs(collection(db, 'stops'))
+        ]);
+        // Build stop ID to name map
+        const stopMap = {};
+        stopsSnap.forEach(docSnap => { stopMap[docSnap.id] = docSnap.data().stopName; });
+        routeList.innerHTML = '';
+        if (routesSnap.empty) {
+          routeList.innerHTML = '<tr><td colspan="4" class="px-6 py-4 text-center text-gray-500">No routes found</td></tr>';
+          return;
+        }
+        routesSnap.forEach(docSnap => {
+          const data = docSnap.data();
+          const stopNames = (data.stops || []).map(id => stopMap[id] || 'Unknown').join(', ');
+          const row = document.createElement('tr');
+          row.className = 'hover:bg-gray-50';
+          row.innerHTML = `
+            <td class="px-6 py-4 whitespace-nowrap font-medium">${data.name}</td>
+            <td class="px-6 py-4">${data.description || '—'}</td>
+            <td class="px-6 py-4 whitespace-nowrap">${stopNames}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+              <button class="text-indigo-600 hover:text-indigo-900 editRouteBtn" data-id="${docSnap.id}">Edit</button>
+              <button class="text-red-600 hover:text-red-900 deleteRoute" data-id="${docSnap.id}">Delete</button>
+            </td>
+          `;
+          routeList.appendChild(row);
+        });
+        // Add event listeners to delete buttons
+        document.querySelectorAll('.deleteRoute').forEach(btn => {
+          btn.addEventListener('click', async () => {
+            if (confirm('Are you sure you want to delete this route?')) {
+              try {
+                await deleteDoc(doc(db, "routes", btn.dataset.id));
+                loadRoutes();
+                loadRoutesToSelect();
+                loadDashboardStats();
+              } catch (error) {
+                alert('Error deleting route: ' + error.message);
+              }
+            }
+          });
+        });
+      } catch (error) {
+        console.error("Error loading routes:", error);
+        routeList.innerHTML = '<tr><td colspan="4" class="px-6 py-4 text-center text-red-500">Error loading routes</td></tr>';
+      }
+    }
+
+    async function loadRoutesToSelect() {
+      const routeSelect = document.getElementById('routeSelect');
+      if (!routeSelect) return;
+      
+      routeSelect.innerHTML = '<option value="">Select Route</option>';
+      
+      try {
+        const snapshot = await getDocs(collection(db, "routes"));
+        snapshot.forEach(docSnap => {
+          const { name } = docSnap.data();
+          routeSelect.innerHTML += `<option value="${docSnap.id}">${name}</option>`;
+        });
+      } catch (error) {
+        console.error("Error loading routes for select:", error);
+      }
+    }
+
+    // --------------------------------------------
+    // ✅ Stop Management Functions
+    // --------------------------------------------
+    async function loadStops() {
+      const stopsList = document.getElementById('stopsList');
+      if (!stopsList) return;
+      
+      stopsList.innerHTML = '<tr><td colspan="3" class="px-6 py-4 text-center text-gray-500"><i class="fas fa-spinner fa-spin"></i> Loading stops...</td></tr>';
+
+      try {
+        const snapshot = await getDocs(collection(db, "stops"));
+        stopsList.innerHTML = '';
+
+        if (snapshot.empty) {
+          stopsList.innerHTML = '<tr><td colspan="3" class="px-6 py-4 text-center text-gray-500">No stops found</td></tr>';
+          return;
+        }
+
+        snapshot.forEach(docSnap => {
+          const data = docSnap.data();
+          const row = document.createElement('tr');
+          row.className = 'hover:bg-gray-50';
+          row.innerHTML = `
+            <td class="px-6 py-4 whitespace-nowrap">${data.stopName}</td>
+            <td class="px-6 py-4 whitespace-nowrap">${data.location || '—'}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+              <button class="text-indigo-600 hover:text-indigo-900 editStopBtn" data-id="${docSnap.id}">Edit</button>
+              <button class="text-red-600 hover:text-red-900 deleteStop" data-id="${docSnap.id}">Delete</button>
+            </td>
+          `;
+          stopsList.appendChild(row);
+        });
+
+        // Add event listeners to edit and delete buttons
+        document.querySelectorAll('.editStopBtn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const stopId = btn.dataset.id;
+            getDoc(doc(db, 'stops', stopId)).then(docSnap => {
+              if (docSnap.exists()) {
+                const data = docSnap.data();
+                document.getElementById('editStopName').value = data.stopName || '';
+                document.getElementById('editStopLocation').value = data.location || '';
+                document.getElementById('editStopMsg').textContent = '';
+                document.getElementById('editStopModal').classList.remove('hidden');
+              }
+            });
+          });
+        });
+
+        document.querySelectorAll('.deleteStop').forEach(btn => {
+          btn.addEventListener('click', async () => {
+            if (confirm('Are you sure you want to delete this stop?')) {
+              try {
+                await deleteDoc(doc(db, "stops", btn.dataset.id));
+                loadStops();
+              } catch (error) {
+                alert('Error deleting stop: ' + error.message);
+              }
+            }
+          });
+        });
+      } catch (error) {
+        console.error("Error loading stops:", error);
+        stopsList.innerHTML = '<tr><td colspan="3" class="px-6 py-4 text-center text-red-500">Error loading stops</td></tr>';
+      }
+    }
+
+    // --------------------------------------------
+    // ✅ Feedback Management Functions
+    // --------------------------------------------
+    async function loadFeedbacks() {
+      const feedbackList = document.getElementById('feedbackList');
+      if (!feedbackList) return;
+      
+      feedbackList.innerHTML = '<div class="p-4 text-center text-gray-500"><i class="fas fa-spinner fa-spin"></i> Loading feedback...</div>';
+
+      try {
+        const snapshot = await getDocs(
+          query(collection(db, "feedback"), orderBy("createdAt", "desc"))
+        );
+        feedbackList.innerHTML = '';
+
+        if (snapshot.empty) {
+          feedbackList.innerHTML = '<div class="p-4 text-center text-gray-500">No feedback yet</div>';
+          return;
+        }
+
+        snapshot.forEach(docSnap => {
+          const data = docSnap.data();
+          const div = document.createElement('div');
+          div.className = 'bg-white p-4 rounded shadow border border-gray-100 mb-4';
+          div.innerHTML = `
+            <div class="flex justify-between items-start">
+              <h3 class="font-bold text-lg">${data.title || 'Feedback'}</h3>
+              <span class="text-xs text-gray-500">${new Date(data.createdAt.toDate()).toLocaleString()}</span>
+            </div>
+            <p class="mt-2 text-gray-700">${data.message}</p>
+            <div class="mt-3 flex flex-col md:flex-row md:justify-between md:items-center gap-2">
+              <span class="text-sm text-gray-500">From: <span class="font-semibold">${data.studentName || '-'}</span> &lt;${data.email || '-'}&gt;</span>
+              <span class="flex gap-2 mt-2 md:mt-0">
+                <button class="replyFeedbackBtn bg-blue-100 text-blue-700 px-3 py-1 rounded text-xs" data-id="${docSnap.id}" data-email="${data.email || ''}" data-name="${data.studentName || ''}"><i class="fas fa-reply"></i> Reply</button>
+                <button class="deleteFeedbackBtn bg-red-100 text-red-700 px-3 py-1 rounded text-xs" data-id="${docSnap.id}"><i class="fas fa-trash"></i> Delete</button>
+              </span>
+            </div>
+          `;
+          feedbackList.appendChild(div);
+        });
+        // Add event listeners for delete and reply
+        feedbackList.querySelectorAll('.deleteFeedbackBtn').forEach(btn => {
+          btn.addEventListener('click', async () => {
+            if (confirm('Are you sure you want to delete this feedback?')) {
+              try {
+                await deleteDoc(doc(db, 'feedback', btn.dataset.id));
+                loadFeedbacks();
+              } catch (err) {
+                alert('Error deleting feedback: ' + err.message);
+              }
+            }
+          });
+        });
+        feedbackList.querySelectorAll('.replyFeedbackBtn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const email = btn.dataset.email;
+            const name = btn.dataset.name;
+            document.getElementById('replyFeedbackEmail').textContent = email;
+            document.getElementById('replyFeedbackName').textContent = name;
+            document.getElementById('replyFeedbackMsg').value = '';
+            document.getElementById('replyFeedbackModal').classList.remove('hidden');
+          });
+        });
+      } catch (error) {
+        console.error("Error loading feedback:", error);
+        feedbackList.innerHTML = '<div class="p-4 text-center text-red-500">Error loading feedback</div>';
+      }
+    }
+
+    // --------------------------------------------
+    // ✅ Notification Management Functions
+    // --------------------------------------------
+    async function loadNotifications() {
+      const notificationList = document.getElementById('notificationList');
+      if (!notificationList) return;
+      
+      notificationList.innerHTML = '<div class="p-4 text-center text-gray-500"><i class="fas fa-spinner fa-spin"></i> Loading notifications...</div>';
+
+      try {
+        const snapshot = await getDocs(
+          query(collection(db, "notifications"), orderBy("createdAt", "desc"))
+        );
+        notificationList.innerHTML = '';
+
+        if (snapshot.empty) {
+          notificationList.innerHTML = '<div class="p-4 text-center text-gray-500">No notifications yet</div>';
+          return;
+        }
+
+        snapshot.forEach(docSnap => {
+          const data = docSnap.data();
+          const div = document.createElement('div');
+          div.className = 'bg-white p-4 rounded shadow border border-gray-100';
+          div.innerHTML = `
+            <div class="flex justify-between items-start">
+              <h3 class="font-bold text-lg">${data.title}</h3>
+              <span class="text-xs text-gray-500">${new Date(data.createdAt.toDate()).toLocaleString()}</span>
+            </div>
+            <p class="mt-2 text-gray-700">${data.message}</p>
+            <div class="mt-3 flex justify-end">
+              <button class="text-red-500 text-sm deleteNotification" data-id="${docSnap.id}">
+                <i class="fas fa-trash mr-1"></i> Delete
+              </button>
+            </div>
+          `;
+          notificationList.appendChild(div);
+        });
+
+        // Add event listeners to delete buttons
+        document.querySelectorAll('.deleteNotification').forEach(btn => {
+          btn.addEventListener('click', async () => {
+            if (confirm('Are you sure you want to delete this notification?')) {
+              try {
+                await deleteDoc(doc(db, "notifications", btn.dataset.id));
+                loadNotifications();
+                loadRecentActivity();
+              } catch (error) {
+                alert('Error deleting notification: ' + error.message);
+              }
+            }
+          });
+        });
+
+        // Update notification badge
+        const unreadCount = snapshot.size;
+        const badge = document.getElementById('notificationBadge');
+        if (badge) {
+          if (unreadCount > 0) {
+            badge.textContent = unreadCount;
+            badge.classList.remove('hidden');
+          } else {
+            badge.classList.add('hidden');
+          }
+        }
+      } catch (error) {
+        console.error("Error loading notifications:", error);
+        notificationList.innerHTML = '<div class="p-4 text-center text-red-500">Error loading notifications</div>';
+      }
+    }
+
+    // Edit Assignment Modal Logic
+    let currentEditStudentId = null;
+    function showEditAssignmentModal(studentId, currentBusId) {
+      currentEditStudentId = studentId;
+      const modal = document.getElementById('editAssignmentModal');
+      const busSelect = document.getElementById('editBusSelect');
+      const msg = document.getElementById('editAssignmentMsg');
+      msg.textContent = '';
+      // Populate bus dropdown
+      busSelect.innerHTML = '';
+      getDocs(collection(db, 'buses')).then(snapshot => {
+        snapshot.forEach(docSnap => {
+          const bus = docSnap.data();
+          const option = document.createElement('option');
+          option.value = docSnap.id;
+          option.textContent = `${bus.busNumber} (${bus.route})`;
+          if (docSnap.id === currentBusId) option.selected = true;
+          busSelect.appendChild(option);
+        });
+      });
+      modal.classList.remove('hidden');
+    }
+    document.getElementById('closeEditModal').addEventListener('click', () => {
+      document.getElementById('editAssignmentModal').classList.add('hidden');
+    });
+    document.getElementById('editAssignmentForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const busId = document.getElementById('editBusSelect').value;
+      const msg = document.getElementById('editAssignmentMsg');
+      msg.textContent = '';
+      if (!currentEditStudentId || !busId) {
+        msg.textContent = '❌ Please select a bus.';
+        return;
+      }
+      try {
+        await updateDoc(doc(db, 'students', currentEditStudentId), {
+          assignedBus: busId,
+          assignedAt: new Date()
+        });
+        msg.textContent = '✅ Assignment updated!';
+        setTimeout(() => {
+          document.getElementById('editAssignmentModal').classList.add('hidden');
+          loadAssignments();
+        }, 1200);
+      } catch (error) {
+        msg.textContent = '❌ ' + error.message;
+      }
+    });
+    // Unassign Bus logic
+    document.getElementById('unassignBusBtn').addEventListener('click', async () => {
+      const msg = document.getElementById('editAssignmentMsg');
+      msg.textContent = '';
+      if (!currentEditStudentId) {
+        msg.textContent = '❌ No student selected.';
+        return;
+      }
+      try {
+        await updateDoc(doc(db, 'students', currentEditStudentId), {
+          assignedBus: deleteField(),
+          assignedAt: deleteField()
+        });
+        msg.textContent = '✅ Bus unassigned!';
+        setTimeout(() => {
+          document.getElementById('editAssignmentModal').classList.add('hidden');
+          loadAssignments();
+        }, 1200);
+      } catch (error) {
+        msg.textContent = '❌ ' + error.message;
+      }
+    });
+
+    // Edit Bus Modal Logic
+    let currentEditBusId = null;
+    document.addEventListener('click', function(e) {
+      if (e.target.classList.contains('editBusBtn')) {
+        const busId = e.target.getAttribute('data-id');
+        currentEditBusId = busId;
+        // Fetch bus details from Firestore and pre-fill modal
+        getDoc(doc(db, 'buses', busId)).then(async docSnap => {
+          if (docSnap.exists()) {
+            const data = docSnap.data();
+            document.getElementById('editBusNumber').value = data.busNumber || '';
+            document.getElementById('editDeparture').value = data.departure || '';
+            document.getElementById('editSeatsTotal').value = data.seatsTotal || '';
+            document.getElementById('editBusMsg').textContent = '';
+            // Populate route dropdown and pre-select current route
+            const select = document.getElementById('editBusRouteSelect');
+            if (select) {
+              select.innerHTML = '<option value="">Select Route</option>';
+              const routesSnap = await getDocs(collection(db, 'routes'));
+              routesSnap.forEach(routeDoc => {
+                const option = document.createElement('option');
+                option.value = routeDoc.id;
+                option.textContent = routeDoc.data().name;
+                if (routeDoc.id === data.route) option.selected = true;
+                select.appendChild(option);
+              });
+            }
+            document.getElementById('editBusModal').classList.remove('hidden');
+          }
+        });
+      }
+    });
+    document.getElementById('editBusForm').onsubmit = async function(e) {
+      e.preventDefault();
+      if (!currentEditBusId) return;
+      const busNumber = document.getElementById('editBusNumber').value.trim();
+      const routeId = document.getElementById('editBusRouteSelect').value;
+      const departure = document.getElementById('editDeparture').value;
+      const seatsTotal = parseInt(document.getElementById('editSeatsTotal').value);
+      try {
+        await updateDoc(doc(db, 'buses', currentEditBusId), {
+          busNumber,
+          route: routeId,
+          departure,
+          seatsTotal
+        });
+        document.getElementById('editBusModal').classList.add('hidden');
+        fetchBuses();
+        loadBuses && loadBuses();
+      } catch (err) {
+        document.getElementById('editBusMsg').textContent = 'Failed to update bus.';
+      }
+    };
+
+    // Edit Stop Modal Logic
+    let currentEditStopId = null;
+    document.addEventListener('click', function(e) {
+      if (e.target.classList.contains('editStopBtn')) {
+        const stopId = e.target.dataset.id;
+        currentEditStopId = stopId;
+        getDoc(doc(db, 'stops', stopId)).then(docSnap => {
+          if (docSnap.exists()) {
+            const data = docSnap.data();
+            document.getElementById('editStopName').value = data.stopName || '';
+            document.getElementById('editStopLocation').value = data.location || '';
+            document.getElementById('editStopMsg').textContent = '';
+            document.getElementById('editStopModal').classList.remove('hidden');
+          }
+        });
+      }
+    });
+    document.getElementById('closeEditStopModal').onclick = function() {
+      document.getElementById('editStopModal').classList.add('hidden');
+    };
+    document.getElementById('cancelEditStopBtn').onclick = function() {
+      document.getElementById('editStopModal').classList.add('hidden');
+    };
+    document.getElementById('editStopForm').onsubmit = async function(e) {
+      e.preventDefault();
+      if (!currentEditStopId) return;
+      const stopName = document.getElementById('editStopName').value.trim();
+      const location = document.getElementById('editStopLocation').value.trim();
+      const msg = document.getElementById('editStopMsg');
+      msg.textContent = '';
+      if (!stopName || !location) {
+        msg.textContent = '❌ Stop name and location are required.';
+        return;
+      }
+      try {
+        await updateDoc(doc(db, 'stops', currentEditStopId), {
+          stopName,
+          location
+        });
+        document.getElementById('editStopModal').classList.add('hidden');
+        loadStops();
+      } catch (err) {
+        msg.textContent = '❌ Failed to update stop.';
+      }
+    };
+
+    // Edit Route Modal Logic (add this before showing the modal)
+    document.addEventListener('click', async function(e) {
+      if (e.target.classList.contains('editRouteBtn')) {
+        const routeId = e.target.getAttribute('data-id');
+        // Fetch route details from Firestore and pre-fill modal
+        const docSnap = await getDoc(doc(db, 'routes', routeId));
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          document.getElementById('editRouteName').value = data.name || '';
+          document.getElementById('editRouteDescription').value = data.description || '';
+          // Set up assigned stops for edit
+          editAssignedStops = Array.isArray(data.stops) ? [...data.stops] : [];
+          await renderEditAllStopsList();
+          renderEditAssignedStopsList();
+          document.getElementById('editRouteMsg').textContent = '';
+          document.getElementById('editRouteModal').classList.remove('hidden');
+        }
+      }
+    });
+
+    // --- Add this function near the top of your main <script> ---
+    async function populateStopsSelect(selectId) {
+      const select = document.getElementById(selectId);
+      if (!select) return;
+      select.innerHTML = '';
+      try {
+        const snapshot = await getDocs(collection(db, 'stops'));
+        snapshot.forEach(docSnap => {
+          const data = docSnap.data();
+          const option = document.createElement('option');
+          option.value = docSnap.id;
+          option.textContent = data.stopName;
+          select.appendChild(option);
+        });
+      } catch (err) {
+        select.innerHTML = '<option disabled>Error loading stops</option>';
+      }
+    }
+    // --- Call on page load for add route form ---
+    document.addEventListener('DOMContentLoaded', () => {
+      populateStopsSelect('routeStops');
+    });
+
+    // --- Checkbox-based stop assignment logic ---
+    let allStops = [];
+    let assignedStops = [];
+
+    async function renderAllStopsList() {
+      const container = document.getElementById('allStopsList');
+      if (!container) return;
+      container.innerHTML = '<div class="text-gray-400 text-sm">Loading stops...</div>';
+      try {
+        const snapshot = await getDocs(collection(db, 'stops'));
+        allStops = [];
+        container.innerHTML = '';
+        snapshot.forEach(docSnap => {
+          const stop = { id: docSnap.id, name: docSnap.data().stopName };
+          allStops.push(stop);
+          const label = document.createElement('label');
+          label.className = 'flex items-center space-x-2 mb-1';
+          const checkbox = document.createElement('input');
+          checkbox.type = 'checkbox';
+          checkbox.value = stop.id;
+          checkbox.checked = assignedStops.includes(stop.id);
+          checkbox.addEventListener('change', (e) => {
+            if (e.target.checked) {
+              assignedStops.push(stop.id);
+            } else {
+              assignedStops = assignedStops.filter(id => id !== stop.id);
+            }
+            renderAssignedStopsList();
+          });
+          label.appendChild(checkbox);
+          label.appendChild(document.createTextNode(stop.name));
+          container.appendChild(label);
+        });
+      } catch (err) {
+        container.innerHTML = '<div class="text-red-500 text-sm">Error loading stops</div>';
+      }
+    }
+
+    function renderAssignedStopsList() {
+      const ul = document.getElementById('assignedStopsList');
+      if (!ul) return;
+      ul.innerHTML = '';
+      assignedStops.forEach((stopId, idx) => {
+        const stop = allStops.find(s => s.id === stopId);
+        if (!stop) return;
+        const li = document.createElement('li');
+        li.className = 'flex items-center justify-between py-1 px-2 border-b last:border-0';
+        li.innerHTML = `
+          <span>${stop.name}</span>
+          <span class="flex space-x-1">
+            <button type="button" class="moveStopUpBtn text-xs px-2 py-1 bg-gray-200 rounded hover:bg-gray-300" data-idx="${idx}">&#8593;</button>
+            <button type="button" class="moveStopDownBtn text-xs px-2 py-1 bg-gray-200 rounded hover:bg-gray-300" data-idx="${idx}">&#8595;</button>
+            <button type="button" class="removeStopBtn text-xs px-2 py-1 bg-red-200 text-red-700 rounded hover:bg-red-300" data-idx="${idx}">Remove</button>
+          </span>
+        `;
+        ul.appendChild(li);
+      });
+      // Add event listeners for up/down/remove
+      ul.querySelectorAll('.moveStopUpBtn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const idx = parseInt(btn.dataset.idx);
+          if (idx > 0) {
+            [assignedStops[idx - 1], assignedStops[idx]] = [assignedStops[idx], assignedStops[idx - 1]];
+            renderAssignedStopsList();
+          }
+        });
+      });
+      ul.querySelectorAll('.moveStopDownBtn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const idx = parseInt(btn.dataset.idx);
+          if (idx < assignedStops.length - 1) {
+            [assignedStops[idx + 1], assignedStops[idx]] = [assignedStops[idx], assignedStops[idx + 1]];
+            renderAssignedStopsList();
+          }
+        });
+      });
+      ul.querySelectorAll('.removeStopBtn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const idx = parseInt(btn.dataset.idx);
+          assignedStops.splice(idx, 1);
+          renderAssignedStopsList();
+          renderAllStopsList();
+        });
+      });
+    }
+
+    // On page load and when showing routes section
+    async function setupRouteStopsUI() {
+      assignedStops = [];
+      await renderAllStopsList();
+      renderAssignedStopsList();
+    }
+    // Call setupRouteStopsUI on page load and in showSection('routes')
+    document.addEventListener('DOMContentLoaded', setupRouteStopsUI);
+
+    // --- Edit Route Modal Logic ---
+    let currentEditRouteId = null;
+    document.addEventListener('click', async function(e) {
+      if (e.target.classList.contains('editRouteBtn')) {
+        const routeId = e.target.getAttribute('data-id');
+        currentEditRouteId = routeId;
+        // Fetch route details from Firestore and pre-fill modal
+        const docSnap = await getDoc(doc(db, 'routes', routeId));
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          document.getElementById('editRouteName').value = data.name || '';
+          document.getElementById('editRouteDescription').value = data.description || '';
+          // Set up assigned stops for edit
+          editAssignedStops = Array.isArray(data.stops) ? [...data.stops] : [];
+          await renderEditAllStopsList();
+          renderEditAssignedStopsList();
+          document.getElementById('editRouteMsg').textContent = '';
+          document.getElementById('editRouteModal').classList.remove('hidden');
+        }
+      }
+    });
+
+    let editAllStops = [];
+    let editAssignedStops = [];
+
+    async function renderEditAllStopsList() {
+      const container = document.getElementById('editAllStopsList');
+      if (!container) return;
+      container.innerHTML = '<div class="text-gray-400 text-sm">Loading stops...</div>';
+      try {
+        const snapshot = await getDocs(collection(db, 'stops'));
+        editAllStops = [];
+        container.innerHTML = '';
+        snapshot.forEach(docSnap => {
+          const stop = { id: docSnap.id, name: docSnap.data().stopName };
+          editAllStops.push(stop);
+          const label = document.createElement('label');
+          label.className = 'flex items-center space-x-2 mb-1';
+          const checkbox = document.createElement('input');
+          checkbox.type = 'checkbox';
+          checkbox.value = stop.id;
+          checkbox.checked = editAssignedStops.includes(stop.id);
+          checkbox.addEventListener('change', (e) => {
+            if (e.target.checked) {
+              editAssignedStops.push(stop.id);
+            } else {
+              editAssignedStops = editAssignedStops.filter(id => id !== stop.id);
+            }
+            renderEditAssignedStopsList();
+          });
+          label.appendChild(checkbox);
+          label.appendChild(document.createTextNode(stop.name));
+          container.appendChild(label);
+        });
+      } catch (err) {
+        container.innerHTML = '<div class="text-red-500 text-sm">Error loading stops</div>';
+      }
+    }
+
+    function renderEditAssignedStopsList() {
+      const ul = document.getElementById('editAssignedStopsList');
+      if (!ul) return;
+      ul.innerHTML = '';
+      editAssignedStops.forEach((stopId, idx) => {
+        const stop = editAllStops.find(s => s.id === stopId);
+        if (!stop) return;
+        const li = document.createElement('li');
+        li.className = 'flex items-center justify-between py-1 px-2 border-b last:border-0';
+        li.innerHTML = `
+          <span>${stop.name}</span>
+          <span class="flex space-x-1">
+            <button type="button" class="editMoveStopUpBtn text-xs px-2 py-1 bg-gray-200 rounded hover:bg-gray-300" data-idx="${idx}">&#8593;</button>
+            <button type="button" class="editMoveStopDownBtn text-xs px-2 py-1 bg-gray-200 rounded hover:bg-gray-300" data-idx="${idx}">&#8595;</button>
+            <button type="button" class="editRemoveStopBtn text-xs px-2 py-1 bg-red-200 text-red-700 rounded hover:bg-red-300" data-idx="${idx}">Remove</button>
+          </span>
+        `;
+        ul.appendChild(li);
+      });
+      // Add event listeners for up/down/remove
+      ul.querySelectorAll('.editMoveStopUpBtn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const idx = parseInt(btn.dataset.idx);
+          if (idx > 0) {
+            [editAssignedStops[idx - 1], editAssignedStops[idx]] = [editAssignedStops[idx], editAssignedStops[idx - 1]];
+            renderEditAssignedStopsList();
+          }
+        });
+      });
+      ul.querySelectorAll('.editMoveStopDownBtn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const idx = parseInt(btn.dataset.idx);
+          if (idx < editAssignedStops.length - 1) {
+            [editAssignedStops[idx + 1], editAssignedStops[idx]] = [editAssignedStops[idx], editAssignedStops[idx + 1]];
+            renderEditAssignedStopsList();
+          }
+        });
+      });
+      ul.querySelectorAll('.editRemoveStopBtn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const idx = parseInt(btn.dataset.idx);
+          editAssignedStops.splice(idx, 1);
+          renderEditAssignedStopsList();
+          renderEditAllStopsList();
+        });
+      });
+    }
+
+    document.getElementById('editRouteForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      if (!currentEditRouteId) return;
+      const name = document.getElementById('editRouteName').value.trim();
+      const desc = document.getElementById('editRouteDescription').value.trim();
+      if (!name) return;
+      try {
+        await updateDoc(doc(db, 'routes', currentEditRouteId), {
+          name,
+          description: desc,
+          stops: editAssignedStops
+        });
+        document.getElementById('editRouteModal').classList.add('hidden');
+        loadRoutes();
+        loadRoutesToSelect();
+        loadDashboardStats();
+      } catch (err) {
+        document.getElementById('editRouteMsg').textContent = '❌ Failed to update route.';
+      }
+    });
+    document.getElementById('closeEditRouteModal').onclick = function() {
+      document.getElementById('editRouteModal').classList.add('hidden');
+    };
+    document.getElementById('cancelEditRouteBtn').onclick = function() {
+      document.getElementById('editRouteModal').classList.add('hidden');
+    };
+
+    // Sidebar toggle logic (improved for all screen sizes)
+    const sidebar = document.querySelector('.sidebar');
+    const sidebarToggleBtn = document.getElementById('sidebarToggleBtn');
+    sidebarToggleBtn.addEventListener('click', () => {
+      sidebar.classList.toggle('closed');
+      document.body.classList.toggle('sidebar-closed');
+    });
+    // Optionally, close sidebar when clicking outside on small screens
+    if (window.innerWidth < 768) {
+      document.addEventListener('click', (e) => {
+        if (!sidebar.contains(e.target) && e.target !== sidebarToggleBtn) {
+          sidebar.classList.add('closed');
+          document.body.classList.add('sidebar-closed');
+        }
+      });
+    }
+
+    // Populate route dropdown in bus form
+    async function populateBusRouteSelect() {
+      const select = document.getElementById('busRouteSelect');
+      if (!select) return;
+      select.innerHTML = '<option value="">Select Route</option>';
+      try {
+        const snapshot = await getDocs(collection(db, 'routes'));
+        snapshot.forEach(docSnap => {
+          const data = docSnap.data();
+          const option = document.createElement('option');
+          option.value = docSnap.id;
+          option.textContent = data.name;
+          select.appendChild(option);
+        });
+      } catch (err) {
+        select.innerHTML = '<option disabled>Error loading routes</option>';
+      }
+    }
+    document.addEventListener('DOMContentLoaded', populateBusRouteSelect);
+
+    // Populate bus and student dropdowns for notifications
+    async function populateNotificationBusSelect() {
+      const select = document.getElementById('notificationBusSelect');
+      if (!select) return;
+      select.innerHTML = '<option value="">Select Bus</option>';
+      try {
+        // Fetch all buses and routes
+        const [busesSnap, routesSnap] = await Promise.all([
+          getDocs(collection(db, 'buses')),
+          getDocs(collection(db, 'routes'))
+        ]);
+        // Build routeId to name map
+        const routeMap = {};
+        routesSnap.forEach(doc => { routeMap[doc.id] = doc.data().name; });
+        busesSnap.forEach(docSnap => {
+          const data = docSnap.data();
+          const routeName = routeMap[data.route] || '';
+          const option = document.createElement('option');
+          option.value = docSnap.id;
+          option.textContent = `Bus No ${data.busNumber} (${routeName})`;
+          select.appendChild(option);
+        });
+      } catch (err) {
+        select.innerHTML = '<option disabled>Error loading buses</option>';
+      }
+    }
+    async function populateNotificationStudentSelect() {
+      const select = document.getElementById('notificationStudentSelect');
+      if (!select) return;
+      select.innerHTML = '<option value="">Select Student</option>';
+      try {
+        const snapshot = await getDocs(collection(db, 'students'));
+        snapshot.forEach(docSnap => {
+          const data = docSnap.data();
+          const option = document.createElement('option');
+          option.value = docSnap.id;
+          option.textContent = `${data.name || data.email}`;
+          select.appendChild(option);
+        });
+      } catch (err) {
+        select.innerHTML = '<option disabled>Error loading students</option>';
+      }
+    }
+    document.addEventListener('DOMContentLoaded', () => {
+      populateNotificationBusSelect();
+      populateNotificationStudentSelect();
+    });
+    // Show/hide fields based on recipient type
+    const recipientTypeSelect = document.getElementById('notificationRecipientType');
+    const busField = document.getElementById('notificationBusField');
+    const studentField = document.getElementById('notificationStudentField');
+    recipientTypeSelect.addEventListener('change', () => {
+      if (recipientTypeSelect.value === 'bus') {
+        busField.classList.remove('hidden');
+        studentField.classList.add('hidden');
+      } else if (recipientTypeSelect.value === 'student') {
+        busField.classList.add('hidden');
+        studentField.classList.remove('hidden');
+      } else {
+        busField.classList.add('hidden');
+        studentField.classList.add('hidden');
+      }
+    });
+    // Send notification form logic
+    const sendNotificationForm = document.getElementById('sendNotificationForm');
+    sendNotificationForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const recipientType = recipientTypeSelect.value;
+      const busId = document.getElementById('notificationBusSelect').value;
+      const studentId = document.getElementById('notificationStudentSelect').value;
+      const title = document.getElementById('notificationTitle').value.trim();
+      const message = document.getElementById('notificationMsg').value.trim();
+      const formMsg = document.getElementById('notificationFormMsg');
+      formMsg.textContent = '';
+      let recipientId = null;
+      if (recipientType === 'bus' && !busId) {
+        formMsg.textContent = 'Please select a bus.';
+        return;
+      }
+      if (recipientType === 'student' && !studentId) {
+        formMsg.textContent = 'Please select a student.';
+        return;
+      }
+      if (recipientType === 'bus') recipientId = busId;
+      if (recipientType === 'student') recipientId = studentId;
+      try {
+        await addDoc(collection(db, 'notifications'), {
+          title,
+          message,
+          recipientType,
+          recipientId: recipientId || null,
+          createdAt: new Date()
+        });
+        document.getElementById('sendNotificationForm').reset();
+        formMsg.textContent = '✅ Notification sent!';
+        loadNotifications();
+        setTimeout(() => { formMsg.textContent = ''; }, 2000);
+      } catch (err) {
+        formMsg.textContent = '❌ ' + err.message;
+      }
+    });
+
+    // In Student Management, add JS logic to fetch and render students from the 'students' collection
+    async function populateStudentBusFilter() {
+      const select = document.getElementById('filterStudentBus');
+      if (!select) return;
+      select.innerHTML = '<option value="">All Buses</option>';
+      try {
+        const busesSnap = await getDocs(collection(db, 'buses'));
+        const routesSnap = await getDocs(collection(db, 'routes'));
+        const routeMap = {};
+        routesSnap.forEach(doc => { routeMap[doc.id] = doc.data().name; });
+        busesSnap.forEach(docSnap => {
+          const data = docSnap.data();
+          const routeName = routeMap[data.route] || '';
+          const option = document.createElement('option');
+          option.value = docSnap.id;
+          option.textContent = `Bus No ${data.busNumber} (${routeName})`;
+          select.appendChild(option);
+        });
+      } catch (err) {
+        select.innerHTML = '<option disabled>Error loading buses</option>';
+      }
+    }
+    async function renderAllStudents() {
+      const tbody = document.getElementById('studentMgmtList');
+      if (!tbody) return;
+      tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-4 text-center text-gray-500"><i class="fas fa-spinner fa-spin"></i> Loading students...</td></tr>';
+      try {
+        const [studentsSnap, busesSnap, routesSnap] = await Promise.all([
+          getDocs(collection(db, 'students')),
+          getDocs(collection(db, 'buses')),
+          getDocs(collection(db, 'routes'))
+        ]);
+        const busMap = {};
+        busesSnap.forEach(doc => busMap[doc.id] = doc.data());
+        const routeMap = {};
+        routesSnap.forEach(doc => routeMap[doc.id] = doc.data().name);
+        const searchValue = (document.getElementById('searchStudentMgmt')?.value || '').toLowerCase();
+        const filterBus = document.getElementById('filterStudentBus')?.value || '';
+        tbody.innerHTML = '';
+        let found = false;
+        studentsSnap.forEach(docSnap => {
+          const student = docSnap.data();
+          if (searchValue && !(student.name?.toLowerCase().includes(searchValue) || student.email?.toLowerCase().includes(searchValue))) return;
+          if (filterBus && student.assignedBus !== filterBus) return;
+          found = true;
+          const bus = student.assignedBus ? busMap[student.assignedBus] : null;
+          const routeName = bus && bus.route ? routeMap[bus.route] : '';
+          const assignedOn = student.assignedAt ? new Date(student.assignedAt.toDate ? student.assignedAt.toDate() : student.assignedAt).toLocaleString() : '-';
+          const row = document.createElement('tr');
+          row.className = 'hover:bg-gray-50';
+          row.innerHTML = `
+            <td class="px-6 py-4 whitespace-nowrap">${student.name || '-'}</td>
+            <td class="px-6 py-4 whitespace-nowrap">${student.email || '-'}</td>
+            <td class="px-6 py-4 whitespace-nowrap">${student.phone || '-'}</td>
+            <td class="px-6 py-4 whitespace-nowrap">${bus ? `Bus No ${bus.busNumber} (${routeName})` : '-'}</td>
+            <td class="px-6 py-4 whitespace-nowrap">${assignedOn}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+              <button class="text-blue-600 hover:text-blue-900 viewStudentBtn" data-id="${docSnap.id}">View</button>
+              <button class="text-green-600 hover:text-green-900 editStudentBtn" data-id="${docSnap.id}">Edit</button>
+              <button class="text-red-600 hover:text-red-900 deleteStudentBtn" data-id="${docSnap.id}">Delete</button>
+            </td>
+          `;
+          tbody.appendChild(row);
+        });
+        if (!found) {
+          tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-4 text-center text-gray-500">No students found</td></tr>';
+        }
+        // Add event listeners for view and delete
+        tbody.querySelectorAll('.viewStudentBtn').forEach(btn => {
+          btn.addEventListener('click', async () => {
+            const id = btn.dataset.id;
+            const docSnap = await getDoc(doc(db, 'students', id));
+            if (docSnap.exists()) {
+              const s = docSnap.data();
+              document.getElementById('studentDetailsContent').innerHTML = `
+                <div><b>Name:</b> ${s.name || '-'}</div>
+                <div><b>Email:</b> ${s.email || '-'}</div>
+                <div><b>Phone:</b> ${s.phone || '-'}</div>
+                <div><b>Assigned Bus:</b> ${s.assignedBus ? `Bus No ${busMap[s.assignedBus]?.busNumber || ''} (${routeMap[busMap[s.assignedBus]?.route] || ''})` : '-'}</div>
+                <div><b>Assigned On:</b> ${s.assignedAt ? new Date(s.assignedAt.toDate ? s.assignedAt.toDate() : s.assignedAt).toLocaleString() : '-'}</div>
+              `;
+              document.getElementById('studentDetailsModal').classList.remove('hidden');
+            }
+          });
+        });
+        tbody.querySelectorAll('.deleteStudentBtn').forEach(btn => {
+          btn.addEventListener('click', async () => {
+            if (confirm('Are you sure you want to delete this student?')) {
+              try {
+                await deleteDoc(doc(db, 'students', btn.dataset.id));
+                renderAllStudents();
+              } catch (err) {
+                alert('Error deleting student: ' + err.message);
+              }
+            }
+          });
+        });
+      } catch (err) {
+        tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-4 text-center text-red-500">Error loading students</td></tr>';
+      }
+    }
+    document.getElementById('closeStudentDetailsModal').onclick = function() {
+      document.getElementById('studentDetailsModal').classList.add('hidden');
+    };
+    document.getElementById('searchStudentMgmt').addEventListener('input', renderAllStudents);
+    document.getElementById('filterStudentBus').addEventListener('change', renderAllStudents);
+    document.addEventListener('DOMContentLoaded', () => {
+      populateStudentBusFilter();
+      renderAllStudents();
+    });
+  </script>
+  <!-- Edit Assignment Modal -->
+  <div id="editAssignmentModal" class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md relative">
+      <button id="closeEditModal" class="absolute top-2 right-2 text-gray-400 hover:text-gray-700 text-xl">&times;</button>
+      <h2 class="text-xl font-semibold mb-4">Edit Bus Assignment</h2>
+      <form id="editAssignmentForm" class="space-y-4">
+        <div>
+          <label for="editBusSelect" class="block text-sm font-medium text-gray-700 mb-1">Select New Bus</label>
+          <select id="editBusSelect" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"></select>
+        </div>
+        <div class="flex space-x-2">
+          <button type="submit" class="flex-1 bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700 transition flex items-center justify-center space-x-2">
+            <i class="fas fa-save"></i>
+            <span>Save Changes</span>
+          </button>
+          <button id="unassignBusBtn" type="button" class="flex-1 bg-red-500 text-white py-2 rounded-lg hover:bg-red-600 transition flex items-center justify-center space-x-2">
+            <i class="fas fa-times-circle"></i>
+            <span>Unassign Bus</span>
+          </button>
+        </div>
+        <p id="editAssignmentMsg" class="text-green-600 font-semibold text-center"></p>
+      </form>
+    </div>
+  </div>
+  <!-- Edit Bus Modal -->
+  <div id="editBusModal" class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md relative">
+      <button id="closeEditBusModal" class="absolute top-2 right-2 text-gray-400 hover:text-gray-700 text-xl">&times;</button>
+      <h2 class="text-xl font-semibold mb-4">Edit Bus</h2>
+      <form id="editBusForm" class="space-y-4">
+        <div>
+          <label for="editBusNumber" class="block text-sm font-medium text-gray-700 mb-1">Bus Number</label>
+          <input type="text" id="editBusNumber" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" />
+        </div>
+        <div>
+          <label for="editBusRouteSelect" class="block text-sm font-medium text-gray-700 mb-1">Route</label>
+          <select id="editBusRouteSelect" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400">
+            <option value="">Select Route</option>
+            <!-- Route options will be populated by JS -->
+          </select>
+        </div>
+        <div>
+          <label for="editDeparture" class="block text-sm font-medium text-gray-700 mb-1">Departure Time</label>
+          <input type="time" id="editDeparture" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" />
+        </div>
+        <div>
+          <label for="editSeatsTotal" class="block text-sm font-medium text-gray-700 mb-1">Total Seats</label>
+          <input type="number" id="editSeatsTotal" min="1" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" />
+        </div>
+        <div id="editBusMsg" class="text-sm text-red-500"></div>
+        <div class="flex space-x-2">
+          <button type="submit" class="flex-1 bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700 transition flex items-center justify-center space-x-2">
+            <i class="fas fa-save"></i>
+            <span>Save Changes</span>
+          </button>
+          <button type="button" id="cancelEditBusBtn" class="flex-1 bg-gray-200 text-gray-700 py-2 rounded-lg hover:bg-gray-300 transition">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  <!-- Edit Stop Modal -->
+  <div id="editStopModal" class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md relative">
+      <button id="closeEditStopModal" class="absolute top-2 right-2 text-gray-400 hover:text-gray-700 text-xl">&times;</button>
+      <h2 class="text-xl font-semibold mb-4">Edit Stop</h2>
+      <form id="editStopForm" class="space-y-4">
+        <div>
+          <label for="editStopName" class="block text-sm font-medium text-gray-700 mb-1">Stop Name</label>
+          <input type="text" id="editStopName" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" />
+        </div>
+        <div>
+          <label for="editStopLocation" class="block text-sm font-medium text-gray-700 mb-1">Location (lat,lng)</label>
+          <input type="text" id="editStopLocation" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" />
+        </div>
+        <div id="editStopMsg" class="text-sm text-red-500"></div>
+        <div class="flex space-x-2">
+          <button type="submit" class="flex-1 bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700 transition flex items-center justify-center space-x-2">
+            <i class="fas fa-save"></i>
+            <span>Save Changes</span>
+          </button>
+          <button type="button" id="cancelEditStopBtn" class="flex-1 bg-gray-200 text-gray-700 py-2 rounded-lg hover:bg-gray-300 transition">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  <!-- Edit Route Modal -->
+  <div id="editRouteModal" class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md relative">
+      <button id="closeEditRouteModal" class="absolute top-2 right-2 text-gray-400 hover:text-gray-700 text-xl">&times;</button>
+      <h2 class="text-xl font-semibold mb-4">Edit Route</h2>
+      <form id="editRouteForm" class="space-y-4">
+        <div>
+          <label for="editRouteName" class="block text-sm font-medium text-gray-700 mb-1">Route Name</label>
+          <input type="text" id="editRouteName" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" />
+        </div>
+        <div>
+          <label for="editRouteDescription" class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+          <input type="text" id="editRouteDescription" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Assign Stops (Order matters)</label>
+          <div id="editAllStopsList" class="bg-gray-50 border rounded p-2 max-h-40 overflow-y-auto mb-2">
+            <!-- All stops with checkboxes will be rendered here -->
+          </div>
+          <div class="mt-2">
+            <label class="block text-xs font-semibold text-gray-600 mb-1">Assigned Stops (Drag to reorder or use up/down)</label>
+            <ul id="editAssignedStopsList" class="bg-white border rounded p-2 min-h-[40px]">
+              <!-- Assigned stops will be rendered here -->
+            </ul>
+          </div>
+        </div>
+        <div id="editRouteMsg" class="text-sm text-red-500"></div>
+        <div class="flex space-x-2">
+          <button type="submit" class="flex-1 bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700 transition flex items-center justify-center space-x-2">
+            <i class="fas fa-save"></i>
+            <span>Save Changes</span>
+          </button>
+          <button type="button" id="cancelEditRouteBtn" class="flex-1 bg-gray-200 text-gray-700 py-2 rounded-lg hover:bg-gray-300 transition">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  <!-- Add Reply Feedback Modal HTML just before </body> -->
+  <div id="replyFeedbackModal" class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md relative">
+      <button id="closeReplyFeedbackModal" class="absolute top-2 right-2 text-gray-400 hover:text-gray-700 text-xl">&times;</button>
+      <h2 class="text-xl font-semibold mb-4">Reply to Feedback</h2>
+      <form id="replyFeedbackForm" class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">To</label>
+          <div class="bg-gray-100 rounded px-3 py-2"><span id="replyFeedbackName"></span> &lt;<span id="replyFeedbackEmail"></span>&gt;</div>
+        </div>
+        <div>
+          <label for="replyFeedbackMsg" class="block text-sm font-medium text-gray-700 mb-1">Message</label>
+          <textarea id="replyFeedbackMsg" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" rows="4"></textarea>
+        </div>
+        <div class="flex space-x-2">
+          <button type="submit" class="flex-1 bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700 transition flex items-center justify-center space-x-2">
+            <i class="fas fa-paper-plane"></i>
+            <span>Send Reply</span>
+          </button>
+          <button type="button" id="cancelReplyFeedbackBtn" class="flex-1 bg-gray-200 text-gray-700 py-2 rounded-lg hover:bg-gray-300 transition">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  <script>
+  // ... existing code ...
+  document.getElementById('closeReplyFeedbackModal').onclick = function() {
+    document.getElementById('replyFeedbackModal').classList.add('hidden');
+  };
+  document.getElementById('cancelReplyFeedbackBtn').onclick = function() {
+    document.getElementById('replyFeedbackModal').classList.add('hidden');
+  };
+  document.getElementById('replyFeedbackForm').onsubmit = function(e) {
+    e.preventDefault();
+    // UI only: just close the modal and show a success message
+    document.getElementById('replyFeedbackModal').classList.add('hidden');
+    alert('Reply sent! (UI only, no email logic implemented)');
+  };
+  // ... existing code ...
+  </script>
+  <!-- Move Edit Student Modal HTML just before the main <script> block -->
+  <div id="editStudentModal" class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md relative">
+      <button id="closeEditStudentModal" class="absolute top-2 right-2 text-gray-400 hover:text-gray-700 text-xl">&times;</button>
+      <h2 class="text-xl font-semibold mb-4">Edit Student</h2>
+      <form id="editStudentForm" class="space-y-4">
+        <div>
+          <label for="editStudentName" class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+          <input type="text" id="editStudentName" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" />
+        </div>
+        <div>
+          <label for="editStudentEmail" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+          <input type="email" id="editStudentEmail" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" />
+        </div>
+        <div>
+          <label for="editStudentPhone" class="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+          <input type="text" id="editStudentPhone" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" />
+        </div>
+        <div>
+          <label for="editStudentBus" class="block text-sm font-medium text-gray-700 mb-1">Assigned Bus</label>
+          <select id="editStudentBus" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400">
+            <option value="">None</option>
+          </select>
+        </div>
+        <div id="editStudentMsg" class="text-sm text-red-500"></div>
+        <div class="flex space-x-2">
+          <button type="submit" class="flex-1 bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700 transition flex items-center justify-center space-x-2">
+            <i class="fas fa-save"></i>
+            <span>Save Changes</span>
+          </button>
+          <button type="button" id="cancelEditStudentBtn" class="flex-1 bg-gray-200 text-gray-700 py-2 rounded-lg hover:bg-gray-300 transition">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  <script>
+  // ... existing code ...
+  // let currentEditStudentId = null;
+
+  document.addEventListener('DOMContentLoaded', () => {
+    // ... existing code ...
+    // Attach Edit Student Modal logic after DOM is loaded
+    document.getElementById('closeEditStudentModal').onclick = function() {
+      document.getElementById('editStudentModal').classList.add('hidden');
+    };
+    document.getElementById('cancelEditStudentBtn').onclick = function() {
+      document.getElementById('editStudentModal').classList.add('hidden');
+    };
+    document.getElementById('editStudentForm').onsubmit = async function(e) {
+      e.preventDefault();
+      if (!currentEditStudentId) return;
+      const name = document.getElementById('editStudentName').value.trim();
+      const email = document.getElementById('editStudentEmail').value.trim();
+      const phone = document.getElementById('editStudentPhone').value.trim();
+      const assignedBus = document.getElementById('editStudentBus').value;
+      const msg = document.getElementById('editStudentMsg');
+      msg.textContent = '';
+      if (!name || !email) {
+        msg.textContent = 'Name and email are required.';
+        return;
+      }
+      try {
+        await updateDoc(doc(db, 'students', currentEditStudentId), {
+          name,
+          email,
+          phone,
+          assignedBus: assignedBus || null
+        });
+        document.getElementById('editStudentModal').classList.add('hidden');
+        renderAllStudents();
+      } catch (err) {
+        msg.textContent = '❌ Failed to update student.';
+      }
+    };
+    // Delegate editStudentBtn clicks
+    document.body.addEventListener('click', async function(e) {
+      if (e.target.classList.contains('editStudentBtn')) {
+        const studentId = e.target.getAttribute('data-id');
+        currentEditStudentId = studentId;
+        // Fetch student details
+        const docSnap = await getDoc(doc(db, 'students', studentId));
+        if (docSnap.exists()) {
+          const s = docSnap.data();
+          document.getElementById('editStudentName').value = s.name || '';
+          document.getElementById('editStudentEmail').value = s.email || '';
+          document.getElementById('editStudentPhone').value = s.phone || '';
+          // Populate bus dropdown
+          const select = document.getElementById('editStudentBus');
+          select.innerHTML = '<option value="">None</option>';
+          const busesSnap = await getDocs(collection(db, 'buses'));
+          const routesSnap = await getDocs(collection(db, 'routes'));
+          const routeMap = {};
+          routesSnap.forEach(doc => { routeMap[doc.id] = doc.data().name; });
+          busesSnap.forEach(busDoc => {
+            const bus = busDoc.data();
+            const routeName = routeMap[bus.route] || '';
+            const option = document.createElement('option');
+            option.value = busDoc.id;
+            option.textContent = `Bus No ${bus.busNumber} (${routeName})`;
+            if (busDoc.id === s.assignedBus) option.selected = true;
+            select.appendChild(option);
+          });
+          document.getElementById('editStudentMsg').textContent = '';
+          document.getElementById('editStudentModal').classList.remove('hidden');
+        }
+      }
+    });
+  });
+  // ... existing code ...
+  </script>
+</body>
+</html>

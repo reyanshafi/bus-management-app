@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Navigation Test</title>
+  <style>
+    .section-content {
+      display: none;
+    }
+    .section-content.active {
+      display: block;
+    }
+    .nav-link {
+      color: blue;
+      text-decoration: none;
+      margin: 10px;
+    }
+    .nav-link.active {
+      color: red;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <a href="#dashboard" class="nav-link active">Dashboard</a>
+    <a href="#transport" class="nav-link">Transport</a>
+    <a href="#profile" class="nav-link">Profile</a>
+    <a href="#feedback" class="nav-link">Feedback</a>
+  </nav>
+  
+  <div id="dashboardSection" class="section-content active">
+    <h2>Dashboard Content</h2>
+    <p>This is the dashboard section.</p>
+  </div>
+  
+  <div id="transportSection" class="section-content">
+    <h2>Transport Content</h2>
+    <p>This is the transport section.</p>
+  </div>
+  
+  <div id="profileSection" class="section-content">
+    <h2>Profile Content</h2>
+    <p>This is the profile section.</p>
+  </div>
+  
+  <div id="feedbackSection" class="section-content">
+    <h2>Feedback Content</h2>
+    <p>This is the feedback section.</p>
+  </div>
+  
+  <script>
+    function showSection(sectionName) {
+      console.log('showSection called with:', sectionName);
+      
+      // Remove active class from all sections
+      document.querySelectorAll('.section-content').forEach(section => {
+        section.classList.remove('active');
+      });
+      
+      // Remove active class from all nav links
+      document.querySelectorAll('.nav-link').forEach(link => {
+        link.classList.remove('active');
+      });
+      
+      // Add active class to target section
+      const targetSection = document.getElementById(sectionName + 'Section');
+      console.log('Target section:', targetSection);
+      if (targetSection) {
+        targetSection.classList.add('active');
+        console.log('Section shown:', sectionName);
+      } else {
+        console.error('Section not found:', sectionName + 'Section');
+      }
+      
+      // Add active class to corresponding nav link
+      const activeLink = document.querySelector(`[href="#${sectionName}"]`);
+      if (activeLink) {
+        activeLink.classList.add('active');
+      }
+    }
+    
+    function setupNavigation() {
+      console.log('Setting up navigation...');
+      
+      const navLinks = document.querySelectorAll('.nav-link');
+      console.log('Found navigation links:', navLinks.length);
+      
+      navLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+          e.preventDefault();
+          const section = this.getAttribute('href').substring(1);
+          console.log('Navigation clicked, switching to section:', section);
+          showSection(section);
+        });
+      });
+    }
+    
+    // Initialize navigation when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('DOM loaded, setting up navigation...');
+      setupNavigation();
+    });
+  </script>
+</body>
+</html>

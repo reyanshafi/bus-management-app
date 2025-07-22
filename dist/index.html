@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bus Management System | Login</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    .login-card {
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+    }
+    .login-card:hover {
+      box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.15);
+    }
+    .bg-gradient-blue {
+      background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
+    }
+  </style>
+</head>
+<body class="bg-gray-50 min-h-screen flex items-center">
+  <!-- Main Content -->
+  <div class="container mx-auto px-4">
+    <div class="flex flex-col lg:flex-row items-center justify-center gap-12">
+      <!-- Left Side - Branding -->
+      <div class="text-center lg:text-left lg:w-1/2">
+        <div class="flex justify-center lg:justify-start items-center mb-6">
+          <i class="fas fa-bus text-4xl text-blue-600 mr-3"></i>
+          <h1 class="text-4xl font-bold text-blue-800">Bus Management System</h1>
+        </div>
+        <h2 class="text-2xl font-semibold text-gray-800 mb-4">Efficient Campus Transportation</h2>
+        <p class="text-lg text-gray-600 max-w-lg">
+          Manage your bus routes, track live locations, and stay updated with the university's transportation system.
+        </p>
+        <div class="mt-8 hidden lg:block">
+          <div class="flex items-center space-x-4 text-gray-600">
+            <div class="flex items-center">
+              <i class="fas fa-check-circle text-green-500 mr-2"></i>
+              <span>Real-time tracking</span>
+            </div>
+            <div class="flex items-center">
+              <i class="fas fa-check-circle text-green-500 mr-2"></i>
+              <span>Schedule management</span>
+            </div>
+          </div>
+          <div class="flex items-center space-x-4 text-gray-600 mt-2">
+            <div class="flex items-center">
+              <i class="fas fa-check-circle text-green-500 mr-2"></i>
+              <span>Instant notifications</span>
+            </div>
+            <div class="flex items-center">
+              <i class="fas fa-check-circle text-green-500 mr-2"></i>
+              <span>Secure access</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Side - Login Card -->
+      <div class="w-full lg:w-1/3">
+        <div class="bg-white rounded-xl login-card p-8">
+          <div class="text-center mb-8">
+            <h3 class="text-2xl font-bold text-gray-800">Welcome Back</h3>
+            <p class="text-gray-600">Sign in to access your account</p>
+          </div>
+          
+          <a href="login.html" class="block w-full bg-gradient-blue text-white py-3 px-4 rounded-lg font-medium hover:opacity-90 transition duration-300 mb-4 text-center">
+            <i class="fas fa-sign-in-alt mr-2"></i> Login
+          </a>
+          
+          <div class="flex items-center my-6">
+            <div class="flex-1 border-t border-gray-200"></div>
+            <span class="px-3 text-gray-500">or</span>
+            <div class="flex-1 border-t border-gray-200"></div>
+          </div>
+          
+          <div class="text-center">
+  <p class="text-gray-600 mb-4">Don't have an account?</p>
+  <a href="tel:+919906512509" class="text-blue-600 font-medium hover:text-blue-800 transition">
+    Contact administrator
+  </a>
+</div>
+
+        </div>
+        
+        <div class="mt-6 text-center text-sm text-gray-500">
+          <p>© 2025 Bus Management System (For Schools & Universities). All rights reserved.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js"></script>
+  
+  <!-- Your main JS -->
+  <script type="module" src="./js/app.js"></script>
+</body>
+</html>
