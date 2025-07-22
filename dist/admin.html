@@ -1062,6 +1062,63 @@
         snapshot.forEach(docSnap => {
           const data = docSnap.data();
           const row = document.createElement('tr');
+
+    // --------------------------------------------
+    // ✅ Student Edit Modal Logic
+    // --------------------------------------------
+    function setupStudentEditModal() {
+      const studentMgmtList = document.getElementById('studentMgmtList');
+      if (!studentMgmtList) return;
+      studentMgmtList.addEventListener('click', async function(e) {
+        if (e.target.classList.contains('editStudentBtn')) {
+          const tr = e.target.closest('tr');
+          const studentId = tr.getAttribute('data-id');
+          if (!studentId) return;
+          // Fetch student data
+          try {
+            const docSnap = await getDoc(doc(db, 'students', studentId));
+            if (!docSnap.exists()) return;
+            const data = docSnap.data();
+            // Populate modal fields
+            document.getElementById('editStopName').value = data.name || '';
+            document.getElementById('editStopLocation').value = data.email || '';
+            // Show modal
+            document.getElementById('editStopModal').classList.remove('hidden');
+            // Save button logic
+            document.getElementById('editStopForm').onsubmit = async function(ev) {
+              ev.preventDefault();
+              const newName = document.getElementById('editStopName').value.trim();
+              const newEmail = document.getElementById('editStopLocation').value.trim();
+              try {
+                await updateDoc(doc(db, 'students', studentId), {
+                  name: newName,
+                  email: newEmail
+                });
+                document.getElementById('editStopMsg').textContent = '✅ Student updated!';
+                setTimeout(() => {
+                  document.getElementById('editStopModal').classList.add('hidden');
+                  document.getElementById('editStopMsg').textContent = '';
+                  loadDashboardStats();
+                }, 1200);
+              } catch (err) {
+                document.getElementById('editStopMsg').textContent = '❌ ' + err.message;
+              }
+            };
+          } catch (err) {
+            // Could not fetch student
+          }
+        }
+      });
+      // Close modal logic
+      document.getElementById('closeEditStopModal').onclick = function() {
+        document.getElementById('editStopModal').classList.add('hidden');
+      };
+      document.getElementById('cancelEditStopBtn').onclick = function() {
+        document.getElementById('editStopModal').classList.add('hidden');
+      };
+    }
+
+    document.addEventListener('DOMContentLoaded', setupStudentEditModal);
           row.className = 'hover:bg-gray-50';
           row.innerHTML = `
             <td class="px-6 py-4 whitespace-nowrap">${data.name || '—'}</td>

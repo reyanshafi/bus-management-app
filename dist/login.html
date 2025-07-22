@@ -1,30 +1,321 @@
-<!-- login.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <title>Login</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      background: linear-gradient(135deg, #ebebef 0%, #f5eafe 100%);
+      min-height: 100vh;
+    }
+    
+    .login-card {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 24px;
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+    }
+    
+    .toggle-container {
+      background: #f1f5f9;
+      border-radius: 16px;
+      padding: 4px;
+      position: relative;
+    }
+    
+    .toggle-btn {
+      flex: 1;
+      padding: 12px 24px;
+      border: none;
+      background: none;
+      border-radius: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      z-index: 2;
+    }
+    
+    .toggle-btn.active {
+      color: white;
+    }
+    
+    .toggle-btn.inactive {
+      color: #64748b;
+    }
+    
+    .toggle-slider {
+      position: absolute;
+      top: 4px;
+      left: 4px;
+      width: calc(50% - 4px);
+      height: calc(100% - 8px);
+      background: linear-gradient(135deg, #3b82f6, #1e40af);
+      border-radius: 12px;
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+    }
+    
+    .toggle-slider.student {
+      transform: translateX(100%);
+    }
+    
+    .input-group {
+      position: relative;
+      margin-bottom: 24px;
+    }
+    
+    .input-icon {
+      position: absolute;
+      left: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #64748b;
+      font-size: 18px;
+      z-index: 2;
+    }
+    
+    .input-field {
+      width: 100%;
+      padding: 16px 20px 16px 50px;
+      border: 2px solid #e2e8f0;
+      border-radius: 16px;
+      font-size: 16px;
+      background: white;
+      transition: all 0.3s ease;
+      font-weight: 500;
+    }
+    
+    .input-field:focus {
+      outline: none;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+      transform: translateY(-2px);
+    }
+    
+    .input-field:focus + .input-icon {
+      color: #3b82f6;
+    }
+    
+    .password-toggle {
+      position: absolute;
+      right: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: #64748b;
+      cursor: pointer;
+      font-size: 18px;
+      padding: 4px;
+      transition: color 0.2s ease;
+    }
+    
+    .password-toggle:hover {
+      color: #3b82f6;
+    }
+    
+    .login-btn {
+      width: 100%;
+      background: linear-gradient(135deg, #3b82f6, #1e40af);
+      color: white;
+      border: none;
+      padding: 18px;
+      border-radius: 16px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .login-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 35px rgba(59, 130, 246, 0.4);
+    }
+    
+    .login-btn:active {
+      transform: translateY(0);
+    }
+    
+    .login-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+      transition: left 0.5s;
+    }
+    
+    .login-btn:hover::before {
+      left: 100%;
+    }
+    
+    .brand-title {
+      background: linear-gradient(135deg, #3b82f6, #1e40af);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-weight: 800;
+      letter-spacing: -0.025em;
+    }
+    
+    .floating-shapes {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      z-index: -1;
+    }
+    
+    .shape {
+      position: absolute;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 50%;
+      animation: float 6s ease-in-out infinite;
+    }
+    
+    .shape:nth-child(1) { width: 80px; height: 80px; top: 20%; left: 10%; animation-delay: 0s; }
+    .shape:nth-child(2) { width: 120px; height: 120px; top: 60%; left: 80%; animation-delay: 2s; }
+    .shape:nth-child(3) { width: 60px; height: 60px; top: 80%; left: 20%; animation-delay: 4s; }
+    
+    @keyframes float {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-20px) rotate(180deg); }
+    }
+    
+    @media (max-width: 480px) {
+      .login-card { margin: 20px; padding: 32px; }
+    }
+  </style>
 </head>
-<body class="bg-gray-100 flex justify-center items-center h-screen">
-  <div class="bg-white p-8 rounded shadow-md w-96">
-    <h2 class="text-2xl font-bold mb-6 text-center">Login</h2>
-    <div class="flex justify-center mb-4">
-      <button id="adminToggle" class="px-4 py-2 rounded-l bg-blue-600 text-white font-semibold focus:outline-none">Admin</button>
-      <button id="studentToggle" class="px-4 py-2 rounded-r bg-gray-200 text-gray-700 font-semibold focus:outline-none">Student</button>
+<body class="flex items-center justify-center min-h-screen p-4">
+  <div class="floating-shapes">
+    <div class="shape"></div>
+    <div class="shape"></div>
+    <div class="shape"></div>
+  </div>
+
+  <div class="login-card w-full max-w-md p-10">
+    <div class="text-center mb-10">
+      <h1 class="brand-title text-4xl mb-3">Welcome</h1>
+      <p class="text-slate-600 text-lg font-medium">Sign in to your account</p>
     </div>
-    <form id="loginForm" class="space-y-4">
-      <input type="email" id="email" placeholder="Email" required class="w-full px-4 py-2 border rounded" />
-      <input type="password" id="password" placeholder="Password" required class="w-full px-4 py-2 border rounded" />
-      <button type="submit" class="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600">Login</button>
-      <p id="errorMsg" class="text-red-500 text-sm mt-2"></p>
+    
+    <div class="toggle-container flex mb-8 relative">
+      <div class="toggle-slider" id="toggleSlider"></div>
+      <button id="adminToggle" class="toggle-btn active">
+        <i class="fas fa-user-shield mr-2"></i>Admin
+      </button>
+      <button id="studentToggle" class="toggle-btn inactive">
+        <i class="fas fa-graduation-cap mr-2"></i>Student
+      </button>
+    </div>
+    
+    <form id="loginForm">
+      <div class="input-group">
+        <i class="fas fa-envelope input-icon"></i>
+        <input 
+          type="email" 
+          id="email" 
+          placeholder="Enter your email" 
+          required 
+          class="input-field"
+        />
+      </div>
+      
+      <div class="input-group">
+        <i class="fas fa-lock input-icon"></i>
+        <input 
+          type="password" 
+          id="password" 
+          placeholder="Enter your password" 
+          required 
+          class="input-field"
+        />
+        <button type="button" class="password-toggle" id="togglePassword">
+          <i class="fas fa-eye"></i>
+        </button>
+      </div>
+      
+      <button type="submit" class="login-btn">
+        <i class="fas fa-sign-in-alt mr-2"></i>
+        Sign In
+      </button>
+      
+      <p id="errorMsg" class="text-red-500 text-sm text-center mt-4 font-medium"></p>
     </form>
+    
+    <div class="text-center mt-8">
+      <p class="text-slate-500 text-sm">Secure login with end-to-end encryption</p>
+    </div>
   </div>
 
   <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js"></script>
+  
+  <script>
+    // Toggle functionality
+    const adminToggle = document.getElementById('adminToggle');
+    const studentToggle = document.getElementById('studentToggle');
+    const toggleSlider = document.getElementById('toggleSlider');
+    
+    function setActiveToggle(active, inactive, isStudent = false) {
+      active.classList.remove('inactive');
+      active.classList.add('active');
+      inactive.classList.remove('active');
+      inactive.classList.add('inactive');
+      
+      if (isStudent) {
+        toggleSlider.classList.add('student');
+      } else {
+        toggleSlider.classList.remove('student');
+      }
+    }
+    
+    adminToggle.addEventListener('click', () => {
+      setActiveToggle(adminToggle, studentToggle, false);
+    });
+    
+    studentToggle.addEventListener('click', () => {
+      setActiveToggle(studentToggle, adminToggle, true);
+    });
+    
+    // Password visibility toggle
+    const togglePassword = document.getElementById('togglePassword');
+    const passwordField = document.getElementById('password');
+    
+    togglePassword.addEventListener('click', () => {
+      const type = passwordField.getAttribute('type') === 'password' ? 'text' : 'password';
+      passwordField.setAttribute('type', type);
+      
+      const icon = togglePassword.querySelector('i');
+      if (type === 'password') {
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+      } else {
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+      }
+    });
+  </script>
+  
   <script type="module" src="./js/login.js"></script>
 </body>
 </html>
