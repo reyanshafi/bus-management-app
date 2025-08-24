@@ -77,9 +77,22 @@
           
           <div class="text-center">
   <p class="text-gray-600 mb-4">Don't have an account?</p>
-  <a href="tel:+919906512509" class="text-blue-600 font-medium hover:text-blue-800 transition">
-    Contact administrator
-  </a>
+  <div class="relative inline-block">
+    <button id="contactAdminBtn" class="text-blue-600 font-medium hover:text-blue-800 transition">
+      Contact administrator
+      <i class="fas fa-chevron-down ml-1"></i>
+    </button>
+    <div id="contactDropdown" class="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg py-2 min-w-max z-50 hidden">
+      <a href="tel:+916005074940" class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition flex items-center">
+        <i class="fas fa-phone mr-3 text-green-500"></i>
+        Call: +91 600 507 4940
+      </a>
+      <a href="mailto:bhatmehran062@gmail.com" class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition flex items-center">
+        <i class="fas fa-envelope mr-3 text-blue-500"></i>
+        Email: bhatmehran062@gmail.com
+      </a>
+    </div>
+  </div>
 </div>
 
         </div>
@@ -95,6 +108,26 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js"></script>
+  
+  <!-- Contact Administrator Dropdown Script -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const contactBtn = document.getElementById('contactAdminBtn');
+      const dropdown = document.getElementById('contactDropdown');
+      
+      contactBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        dropdown.classList.toggle('hidden');
+      });
+      
+      // Close dropdown when clicking outside
+      document.addEventListener('click', function(e) {
+        if (!contactBtn.contains(e.target) && !dropdown.contains(e.target)) {
+          dropdown.classList.add('hidden');
+        }
+      });
+    });
+  </script>
   
   <!-- Your main JS -->
   <script type="module" src="./js/app.js"></script>

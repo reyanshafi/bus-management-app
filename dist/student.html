@@ -111,9 +111,9 @@
   </style>
 </head>
 <body class="bg-white min-h-screen">
-  <!-- Mobile Menu Button -->
-  <button id="mobileMenuButton" class="md:hidden fixed top-4 left-4 z-50 bg-white p-3 rounded-lg shadow-md border">
-    <i class="fas fa-bars text-gray-700"></i>
+  <!-- Unified Sidebar Toggle Button -->
+  <button id="sidebarToggleBtn" class="fixed top-4 left-4 md:absolute md:top-2 md:left-2 z-50 bg-white p-3 rounded-lg shadow-md border hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-200">
+    <i id="sidebarToggleIcon" class="fas fa-bars text-gray-700"></i>
   </button>
 
   <!-- Sidebar Navigation -->
@@ -176,9 +176,6 @@
     <header class="bg-white border-b p-6 sticky top-0 z-30">
       <div class="flex justify-between items-center">
         <div class="flex items-center gap-3">
-          <button id="sidebarToggleBtn" class="md:inline-block p-2 rounded-lg hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-200 mr-2">
-            <i id="sidebarToggleIcon" class="fas fa-bars text-gray-700 text-xl"></i>
-          </button>
           <div>
             <h1 class="text-3xl font-bold text-gray-900" id="sectionTitle">Dashboard</h1>
             <p class="text-gray-600 mt-1">Welcome back to your transport portal</p>
@@ -506,21 +503,79 @@
     });
     // Sidebar toggle logic
     const sidebar = document.querySelector('.sidebar');
-    const mainContent = document.querySelector('.md\\:ml-64');
+    const mainContent = document.querySelector('main');
     const toggleBtn = document.getElementById('sidebarToggleBtn');
     const toggleIcon = document.getElementById('sidebarToggleIcon');
-    let sidebarOpen = true;
+    let sidebarOpen = window.innerWidth >= 768; // Start open on desktop, closed on mobile
+    
+    // Set initial state
+    if (window.innerWidth < 768) {
+      sidebar.classList.remove('active');
+      sidebarOpen = false;
+    } else {
+      sidebar.classList.remove('closed');
+      sidebarOpen = true;
+    }
+    
     toggleBtn.addEventListener('click', function() {
-      sidebarOpen = !sidebarOpen;
-      sidebar.classList.toggle('closed');
+      if (window.innerWidth < 768) {
+        // Mobile behavior: toggle .active class
+        sidebar.classList.toggle('active');
+        sidebarOpen = sidebar.classList.contains('active');
+      } else {
+        // Desktop behavior: toggle .closed class
+        sidebar.classList.toggle('closed');
+        sidebarOpen = !sidebar.classList.contains('closed');
+        
+        // Adjust main content margin on desktop
+        if (sidebarOpen) {
+          mainContent.classList.add('md:ml-64');
+        } else {
+          mainContent.classList.remove('md:ml-64');
+        }
+      }
+      
+      // Update icon
       if (sidebarOpen) {
         toggleIcon.classList.remove('fa-xmark', 'fa-times');
         toggleIcon.classList.add('fa-bars');
-        mainContent.classList.add('md:ml-64');
       } else {
         toggleIcon.classList.remove('fa-bars');
         toggleIcon.classList.add('fa-xmark');
+      }
+    });
+    
+    // Close mobile menu when clicking outside
+    document.addEventListener('click', function(e) {
+      if (window.innerWidth < 768 && sidebarOpen) {
+        if (!sidebar.contains(e.target) && e.target !== toggleBtn && !toggleBtn.contains(e.target)) {
+          sidebar.classList.remove('active');
+          sidebarOpen = false;
+          toggleIcon.classList.remove('fa-xmark', 'fa-times');
+          toggleIcon.classList.add('fa-bars');
+        }
+      }
+    });
+    
+    // Handle window resize
+    window.addEventListener('resize', function() {
+      if (window.innerWidth >= 768) {
+        // Desktop: remove mobile classes, ensure proper desktop state
+        sidebar.classList.remove('active');
+        if (!sidebarOpen) {
+          sidebar.classList.add('closed');
+        } else {
+          sidebar.classList.remove('closed');
+          mainContent.classList.add('md:ml-64');
+        }
+      } else {
+        // Mobile: remove desktop classes, start closed
+        sidebar.classList.remove('closed');
+        sidebar.classList.remove('active');
         mainContent.classList.remove('md:ml-64');
+        sidebarOpen = false;
+        toggleIcon.classList.remove('fa-xmark', 'fa-times');
+        toggleIcon.classList.add('fa-bars');
       }
     });
 
