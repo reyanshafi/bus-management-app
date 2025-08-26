@@ -123,8 +123,8 @@ async function loadDashboard() {
   // Show loading states
   document.getElementById('assignedBusCard').textContent = 'Loading...';
   document.getElementById('nextStopCard').textContent = 'Loading...';
-  document.getElementById('etaCard').textContent = 'Loading...';
-  document.getElementById('busStatusCard').textContent = 'Loading...';
+  document.getElementById('gpsSignalCard').innerHTML = '<div class="text-lg font-semibold text-gray-500">🔄 Starting...</div><div class="text-sm text-gray-500">Initializing GPS</div>';
+  document.getElementById('lastUpdateCard').innerHTML = '<div class="text-lg font-semibold text-gray-500">--:--:--</div><div class="text-sm text-gray-500">Waiting for data</div>';
   const dashboardNotifications = document.getElementById('dashboardNotifications');
   dashboardNotifications.innerHTML = `<div class="p-3 text-center text-gray-500"><i class="fas fa-spinner fa-spin"></i> Loading announcements...</div>`;
 
@@ -134,8 +134,8 @@ async function loadDashboard() {
     if (!user) {
       document.getElementById('assignedBusCard').textContent = 'Not logged in';
       document.getElementById('nextStopCard').textContent = '-';
-      document.getElementById('etaCard').textContent = '-';
-      document.getElementById('busStatusCard').textContent = '-';
+      document.getElementById('gpsSignalCard').innerHTML = '<div class="text-lg font-semibold text-red-500">❌ Not logged in</div><div class="text-sm text-gray-500">Please login first</div>';
+      document.getElementById('lastUpdateCard').innerHTML = '<div class="text-lg font-semibold text-red-500">--:--:--</div><div class="text-sm text-gray-500">Not logged in</div>';
       dashboardNotifications.innerHTML = '<div class="p-3 text-center text-red-500">Not logged in</div>';
       return;
     }
@@ -146,8 +146,8 @@ async function loadDashboard() {
     if (!studentDoc.exists()) {
       document.getElementById('assignedBusCard').textContent = 'No bus assigned';
       document.getElementById('nextStopCard').textContent = '-';
-      document.getElementById('etaCard').textContent = '-';
-      document.getElementById('busStatusCard').textContent = '-';
+      document.getElementById('gpsSignalCard').innerHTML = '<div class="text-lg font-semibold text-orange-500">⚠️ No bus assigned</div><div class="text-sm text-gray-500">Contact administrator</div>';
+      document.getElementById('lastUpdateCard').innerHTML = '<div class="text-lg font-semibold text-gray-500">--:--:--</div><div class="text-sm text-gray-500">No bus data</div>';
       return;
     }
     const studentData = studentDoc.data();
@@ -155,8 +155,8 @@ async function loadDashboard() {
     if (!assignedBusId) {
       document.getElementById('assignedBusCard').textContent = 'No bus assigned';
       document.getElementById('nextStopCard').textContent = '-';
-      document.getElementById('etaCard').textContent = '-';
-      document.getElementById('busStatusCard').textContent = '-';
+      document.getElementById('gpsSignalCard').innerHTML = '<div class="text-lg font-semibold text-orange-500">⚠️ No bus assigned</div><div class="text-sm text-gray-500">Contact administrator</div>';
+      document.getElementById('lastUpdateCard').innerHTML = '<div class="text-lg font-semibold text-gray-500">--:--:--</div><div class="text-sm text-gray-500">No bus data</div>';
       return;
     }
     // Real-time updates for assigned bus
@@ -164,8 +164,8 @@ async function loadDashboard() {
       if (!busDoc.exists()) {
         document.getElementById('assignedBusCard').textContent = 'Bus not found';
         document.getElementById('nextStopCard').textContent = '-';
-        document.getElementById('etaCard').textContent = '-';
-        document.getElementById('busStatusCard').textContent = '-';
+        document.getElementById('gpsSignalCard').innerHTML = '<div class="text-lg font-semibold text-red-500">❌ Bus not found</div><div class="text-sm text-gray-500">Database error</div>';
+        document.getElementById('lastUpdateCard').innerHTML = '<div class="text-lg font-semibold text-red-500">--:--:--</div><div class="text-sm text-gray-500">Bus not found</div>';
         return;
       }
       const bus = busDoc.data();
@@ -190,8 +190,16 @@ async function loadDashboard() {
       }
       document.getElementById('assignedBusCard').textContent = `Bus No ${bus.busNumber} (${routeName})`;
       document.getElementById('nextStopCard').textContent = stopName;
-      document.getElementById('etaCard').textContent = eta;
-      document.getElementById('busStatusCard').textContent = 'Scheduled';
+      
+      // Update GPS Signal card if we have status data
+      if (bus.status) {
+        updateGPSSignalCard(bus.status, bus.satellites || 0, bus.hdop || 0);
+      }
+      
+      // Update Last Update card if we have timestamp data
+      if (bus.lastLocationUpdate) {
+        updateLastUpdateCard(bus.lastLocationUpdate);
+      }
     });
     // Real-time notifications (announcements)
     // Listen for notifications sent to all, to this bus, or to this student
@@ -228,8 +236,8 @@ async function loadDashboard() {
   } catch (error) {
     document.getElementById('assignedBusCard').textContent = 'Error';
     document.getElementById('nextStopCard').textContent = 'Error';
-    document.getElementById('etaCard').textContent = 'Error';
-    document.getElementById('busStatusCard').textContent = 'Error';
+    document.getElementById('gpsSignalCard').innerHTML = '<div class="text-lg font-semibold text-red-500">❌ Error</div><div class="text-sm text-gray-500">Failed to load</div>';
+    document.getElementById('lastUpdateCard').innerHTML = '<div class="text-lg font-semibold text-red-500">--:--:--</div><div class="text-sm text-gray-500">Error loading</div>';
     dashboardNotifications.innerHTML = `<div class="p-3 text-center text-red-500">Failed to load: ${error.message}</div>`;
   }
 }
@@ -628,25 +636,209 @@ function loadRecentFeedbackByEmail(email) {
 
 // --- Add this function for live bus occupancy calculation ---
 function loadBusOccupancy(busId) {
+  if (!busId) {
+    console.warn('No bus ID provided for occupancy calculation');
+    document.getElementById('busOccupancyInfo').textContent = '-- / --';
+    return;
+  }
+
   const busDocRef = doc(db, 'buses', busId);
+  
   // Listen to bus doc for totalSeats
   onSnapshot(busDocRef, (busDoc) => {
     if (!busDoc.exists()) {
+      console.log('Bus document not found:', busId);
       document.getElementById('busOccupancyInfo').textContent = '-- / --';
       return;
     }
+    
     const bus = busDoc.data();
-    const totalSeats = bus.totalSeats || bus.seatsTotal || '-';
-    if (totalSeats === '-') {
+    const totalSeats = bus.totalSeats || bus.seatsTotal || 50; // Default to 50 if not specified
+    
+    // Listen to students assigned to this bus with proper error handling
+    try {
+      const studentsQuery = query(
+        collection(db, 'students'), 
+        where('assignedBus', '==', busId)
+      );
+      
+      onSnapshot(studentsQuery, (snap) => {
+        const assignedCount = snap.size;
+        const availableSeats = Math.max(0, totalSeats - assignedCount);
+        
+        // Update the UI
+        const occupancyElement = document.getElementById('busOccupancyInfo');
+        if (occupancyElement) {
+          occupancyElement.textContent = `${availableSeats} / ${totalSeats}`;
+          
+          // Add visual indicators based on seat availability
+          if (availableSeats === 0) {
+            occupancyElement.className = 'text-red-600 font-semibold';
+          } else if (availableSeats <= 5) {
+            occupancyElement.className = 'text-orange-600 font-semibold';
+          } else {
+            occupancyElement.className = 'text-green-600 font-semibold';
+          }
+        }
+        
+        console.log(`Bus ${busId} occupancy: ${assignedCount}/${totalSeats} (${availableSeats} available)`);
+      }, (error) => {
+        console.error('Error listening to students query:', error);
+        if (error.code === 'failed-precondition') {
+          console.error('Index not created yet. Please create the required index in Firebase Console.');
+          // Fallback: show total seats only
+          const occupancyElement = document.getElementById('busOccupancyInfo');
+          if (occupancyElement) {
+            occupancyElement.textContent = `? / ${totalSeats}`;
+            occupancyElement.className = 'text-gray-500';
+          }
+        }
+      });
+      
+    } catch (error) {
+      console.error('Error setting up students query:', error);
       document.getElementById('busOccupancyInfo').textContent = '-- / --';
-      return;
     }
-    // Listen to students assigned to this bus
-    const studentsQuery = query(collection(db, 'students'), where('assignedBus', '==', busId));
-    onSnapshot(studentsQuery, (snap) => {
-      const assignedCount = snap.size;
-      const availableSeats = totalSeats - assignedCount;
-      document.getElementById('busOccupancyInfo').textContent = `${availableSeats} / ${totalSeats}`;
-    });
+  }, (error) => {
+    console.error('Error listening to bus document:', error);
+    document.getElementById('busOccupancyInfo').textContent = '-- / --';
   });
-} 
+}
+
+// --- Add functions to update GPS Signal and Last Update cards ---
+function updateGPSSignalCard(status, satellites = 0, hdop = 0) {
+  const gpsSignalCard = document.getElementById('gpsSignalCard');
+  if (!gpsSignalCard) return;
+
+  let statusColor = 'text-gray-600';
+  let statusText = status;
+  let statusIcon = '🔄';
+
+  switch (status) {
+    case 'GPS_ACTIVE':
+      statusColor = 'text-green-600';
+      statusIcon = '✅';
+      statusText = `Active (${satellites} satellites)`;
+      break;
+    case 'GPS_SEARCHING':
+      statusColor = 'text-blue-600';
+      statusIcon = '🔍';
+      statusText = 'Searching...';
+      break;
+    case 'GPS_STALE':
+      statusColor = 'text-orange-600';
+      statusIcon = '⏰';
+      statusText = 'Signal Lost';
+      break;
+    case 'GPS_INITIALIZING':
+      statusColor = 'text-purple-600';
+      statusIcon = '🔄';
+      statusText = 'Starting...';
+      break;
+    default:
+      statusColor = 'text-gray-600';
+      statusIcon = '❓';
+      statusText = 'Unknown';
+  }
+
+  gpsSignalCard.innerHTML = `
+    <div class="text-lg font-semibold ${statusColor}">${statusIcon} ${statusText}</div>
+    ${satellites > 0 ? `<div class="text-sm text-gray-500">HDOP: ${hdop}</div>` : ''}
+  `;
+}
+
+function updateLastUpdateCard(timestamp) {
+  const lastUpdateCard = document.getElementById('lastUpdateCard');
+  if (!lastUpdateCard) return;
+
+  if (timestamp) {
+    const lastUpdate = timestamp.toDate ? 
+      timestamp.toDate().toLocaleTimeString() : 
+      new Date(timestamp).toLocaleTimeString();
+    
+    lastUpdateCard.innerHTML = `
+      <div class="text-lg font-semibold text-green-600">${lastUpdate}</div>
+      <div class="text-sm text-gray-500">Live Data</div>
+    `;
+  } else {
+    lastUpdateCard.innerHTML = `
+      <div class="text-lg font-semibold text-gray-500">--:--:--</div>
+      <div class="text-sm text-gray-500">No Data</div>
+    `;
+  }
+}
+
+// --- Add function to listen for ESP8266 updates and update dashboard cards ---
+function listenForESP8266Updates() {
+  const busId = "18l7Gds0QHlJGTemzI8g";
+  const busDocRef = doc(db, 'buses', busId);
+  
+  onSnapshot(busDocRef, (doc) => {
+    if (doc.exists()) {
+      const data = doc.data();
+      
+      // Update GPS Signal card
+      if (data.status) {
+        updateGPSSignalCard(data.status, data.satellites || 0, data.hdop || 0);
+      }
+      
+      // Update Last Update card
+      if (data.lastLocationUpdate) {
+        updateLastUpdateCard(data.lastLocationUpdate);
+      }
+      
+      // Update bus occupancy if we have seat data
+      if (data.seatsTotal || data.totalSeats) {
+        loadBusOccupancy(busId);
+      }
+    }
+  }, (error) => {
+    console.error('Error listening to ESP8266 updates:', error);
+  });
+}
+
+// Helper function to check if required indexes exist
+async function checkIndexesReady() {
+  try {
+    // Test the problematic query
+    const testQuery = query(
+      collection(db, 'students'), 
+      where('assignedBus', '==', 'test')
+    );
+    
+    const testSnapshot = await getDocs(testQuery);
+    console.log('✅ Required indexes are ready');
+    return true;
+  } catch (error) {
+    if (error.code === 'failed-precondition') {
+      console.error('❌ Required indexes are not ready yet');
+      console.error('Please create the index for students collection with field: assignedBus');
+      return false;
+    }
+    console.error('Unexpected error checking indexes:', error);
+    return true;
+  }
+}
+
+// Call this function when the page loads
+document.addEventListener('DOMContentLoaded', async () => {
+  const indexesReady = await checkIndexesReady();
+  if (!indexesReady) {
+    // Show a user-friendly message
+    const errorDiv = document.createElement('div');
+    errorDiv.className = 'bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded mb-4';
+    errorDiv.innerHTML = `
+      <strong>⚠️ System Setup Required:</strong> 
+      The live tracking system is being configured. Please wait a few minutes for the setup to complete.
+      <br><br>
+      <strong>What's happening:</strong> Creating database indexes for optimal performance...
+    `;
+    
+    // Insert at the top of the main content
+    const mainContent = document.querySelector('.main-content') || document.body;
+    mainContent.insertBefore(errorDiv, mainContent.firstChild);
+  }
+  
+  // Start listening for ESP8266 updates to update dashboard cards
+  listenForESP8266Updates();
+}); 

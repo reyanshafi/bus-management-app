@@ -330,6 +330,15 @@
         </div>
         
         <div>
+          <label for="gpsDeviceId" class="block text-sm font-semibold text-gray-700 mb-2">GPS Device ID 
+            <span class="text-xs text-gray-500">(for live tracking)</span>
+          </label>
+          <input type="text" id="gpsDeviceId" placeholder="Enter GPS device ID (e.g., BUS_001)" 
+                 class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all">
+          <p class="text-xs text-gray-500 mt-1">💡 This should match the busId in your ESP8266 GPS device</p>
+        </div>
+        
+        <div>
           <label for="busRouteSelect" class="block text-sm font-semibold text-gray-700 mb-2">Route</label>
           <select id="busRouteSelect" required 
                   class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all">
@@ -383,6 +392,7 @@
         <thead class="bg-gradient-to-r from-gray-50 to-gray-100">
           <tr>
             <th class="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Bus Number</th>
+            <th class="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">GPS ID</th>
             <th class="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Route</th>
             <th class="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Departure</th>
             <th class="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Total Seats</th>
@@ -392,7 +402,7 @@
         </thead>
         <tbody id="busList" class="divide-y divide-gray-100">
           <tr>
-            <td colspan="6" class="px-6 py-12 text-center">
+            <td colspan="7" class="px-6 py-12 text-center">
               <div class="flex flex-col items-center gap-3 text-gray-400">
                 <i class="fas fa-spinner fa-spin text-2xl"></i>
                 <span class="text-sm font-medium">Loading buses...</span>
@@ -1547,6 +1557,7 @@
       document.getElementById('busForm')?.addEventListener('submit', async (e) => {
         e.preventDefault();
         const busNumber = document.getElementById('busNumber').value.trim();
+        const gpsDeviceId = document.getElementById('gpsDeviceId').value.trim();
         const routeId = document.getElementById('busRouteSelect').value;
         const departure = document.getElementById('departure').value;
         const seatsTotal = parseInt(document.getElementById('seatsTotal').value);
@@ -1557,9 +1568,14 @@
         try {
           await addDoc(collection(db, "buses"), {
             busNumber,
+            gpsDeviceId: gpsDeviceId || null, // Optional field for GPS tracking
             route: routeId,
             departure,
-            seatsTotal
+            seatsTotal,
+            isActive: true, // Default to active
+            currentLatitude: null, // Will be updated by GPS
+            currentLongitude: null, // Will be updated by GPS
+            lastLocationUpdate: null // Will be updated by GPS
           });
           document.getElementById('busForm').reset();
           fetchBuses();
@@ -1889,7 +1905,7 @@
         });
 
         if (filteredBuses.length === 0) {
-          busList.innerHTML = '<tr><td colspan="6" class="px-6 py-4 text-center text-gray-500">No buses match your search</td></tr>';
+          busList.innerHTML = '<tr><td colspan="7" class="px-6 py-4 text-center text-gray-500">No buses match your search</td></tr>';
           return;
         }
 
@@ -1908,6 +1924,11 @@
           row.className = 'hover:bg-gray-50';
           row.innerHTML = `
             <td class="px-6 py-4 whitespace-nowrap">${bus.busNumber}</td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <span class="text-xs ${bus.gpsDeviceId ? 'text-green-600 bg-green-100' : 'text-gray-400 bg-gray-100'} px-2 py-1 rounded-full">
+                ${bus.gpsDeviceId || 'Not Set'}
+              </span>
+            </td>
             <td class="px-6 py-4">${routeName}</td>
             <td class="px-6 py-4 whitespace-nowrap">${bus.departure || '-'}</td>
             <td class="px-6 py-4 whitespace-nowrap">${totalSeats}</td>
@@ -2433,6 +2454,7 @@
           if (docSnap.exists()) {
             const data = docSnap.data();
             document.getElementById('editBusNumber').value = data.busNumber || '';
+            document.getElementById('editGpsDeviceId').value = data.gpsDeviceId || '';
             document.getElementById('editDeparture').value = data.departure || '';
             document.getElementById('editSeatsTotal').value = data.seatsTotal || '';
             document.getElementById('editBusMsg').textContent = '';
@@ -2458,12 +2480,14 @@
       e.preventDefault();
       if (!currentEditBusId) return;
       const busNumber = document.getElementById('editBusNumber').value.trim();
+      const gpsDeviceId = document.getElementById('editGpsDeviceId').value.trim();
       const routeId = document.getElementById('editBusRouteSelect').value;
       const departure = document.getElementById('editDeparture').value;
       const seatsTotal = parseInt(document.getElementById('editSeatsTotal').value);
       try {
         await updateDoc(doc(db, 'buses', currentEditBusId), {
           busNumber,
+          gpsDeviceId: gpsDeviceId || null, // Optional field for GPS tracking
           route: routeId,
           departure,
           seatsTotal
@@ -3154,6 +3178,12 @@
         <div>
           <label for="editBusNumber" class="block text-sm font-medium text-gray-700 mb-1">Bus Number</label>
           <input type="text" id="editBusNumber" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" />
+        </div>
+        <div>
+          <label for="editGpsDeviceId" class="block text-sm font-medium text-gray-700 mb-1">GPS Device ID 
+            <span class="text-xs text-gray-500">(for live tracking)</span>
+          </label>
+          <input type="text" id="editGpsDeviceId" placeholder="Enter GPS device ID (e.g., BUS_001)" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" />
         </div>
         <div>
           <label for="editBusRouteSelect" class="block text-sm font-medium text-gray-700 mb-1">Route</label>
